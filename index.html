@@ -1,0 +1,2688 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPack 3D | โครงงานคณิตศาสตร์ โรงเรียนพัทลุง</title>
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/K8k8NDqT/Phatthalung-School-logo-(1).png">
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/K8k8NDqT/Phatthalung-School-logo-(1).png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' },
+            startup: { typeset: false }
+        };
+    </script>
+    <script id="MathJax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --pt-green: #15803d;
+            --pt-emerald: #065f46;
+            --pt-yellow: #facc15;
+            --pt-amber: #f59e0b;
+        }
+        body {
+            font-family: 'Prompt', sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+            overflow-x: hidden;
+        }
+        .font-mono-code {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .blueprint-grid {
+            background-color: #ffffff;
+            background-image: 
+                linear-gradient(to right, rgba(22, 163, 74, 0.08) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(22, 163, 74, 0.08) 1px, transparent 1px);
+            background-size: 18px 18px;
+        }
+        .bento-card {
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(22, 163, 74, 0.18);
+            box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.06);
+            transition: all 0.25s ease;
+        }
+        .bento-card:hover {
+            border-color: rgba(22, 163, 74, 0.45);
+            box-shadow: 0 20px 40px -15px rgba(22, 163, 74, 0.16);
+        }
+        .glass-dock-card {
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            transition: all 0.25s ease;
+        }
+        .glass-dock-card:hover {
+            background: rgba(250, 204, 21, 0.25);
+            border-color: rgba(250, 204, 21, 0.8);
+            transform: translateY(-4px);
+        }
+        input[type=range] {
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 999px;
+            background: #e2e8f0;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            border: 2px solid #fef08a;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(22, 163, 74, 0.35);
+        }
+        .stage-3d {
+            perspective: 900px;
+        }
+        .cloth-3d-body {
+            transform-style: preserve-3d;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes foldFlipX {
+            0% { transform: rotateY(0deg) scale(1); }
+            45% { transform: rotateY(85deg) scale(1.06); }
+            100% { transform: rotateY(0deg) scale(1); }
+        }
+        @keyframes foldFlipY {
+            0% { transform: rotateX(0deg) scale(1); }
+            45% { transform: rotateX(85deg) scale(1.06); }
+            100% { transform: rotateX(0deg) scale(1); }
+        }
+        .anim-flip-x {
+            animation: foldFlipX 0.55s ease;
+        }
+        .anim-flip-y {
+            animation: foldFlipY 0.55s ease;
+        }
+        body.presentation-mode #page-app {
+            max-width: 96vw;
+        }
+        body.presentation-mode #kpiBagVol,
+        body.presentation-mode #kpiStepClothes,
+        body.presentation-mode #kpiFoldSize,
+        body.presentation-mode #kpiUsage {
+            font-size: 2rem;
+            line-height: 2.35rem;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- ===================================================================== -->
+    <!-- ACADEMIC TOP HEADER & LEFT SLIDE-OUT DRAWER (CHULA-INSPIRED STYLE)    -->
+    <!-- ===================================================================== -->
+    <header id="mainHeader" class="fixed top-0 left-0 right-0 z-40 transition-all duration-300 bg-gradient-to-b from-black/85 via-black/60 to-transparent text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-3">
+            <!-- Left: Drawer Toggle Button + Brand Identity -->
+            <div class="flex items-center gap-3">
+                <button onclick="openLeftDrawer()" id="leftMenuOpenBtn" class="px-3.5 py-2 rounded-2xl bg-yellow-400 hover:bg-yellow-300 text-green-950 font-extrabold text-xs sm:text-sm shadow-lg transition flex items-center gap-2 shrink-0">
+                    <span class="text-base leading-none">☰</span>
+                    <span>เมนู</span>
+                </button>
+
+                <div onclick="switchMainPage('page-home')" class="flex items-center gap-2.5 cursor-pointer group">
+                    <div class="w-10 h-10 rounded-2xl bg-white/95 p-1 flex items-center justify-center shadow-lg border border-yellow-300 group-hover:scale-105 transition shrink-0">
+                        <img src="https://i.postimg.cc/K8k8NDqT/Phatthalung-School-logo-(1).png" onerror="this.src='https://placehold.co/44x44/15803d/fef08a?text=PT'" alt="โลโก้โรงเรียนพัทลุง" class="w-full h-full object-contain">
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span id="brandTitle" class="font-extrabold text-base sm:text-xl tracking-tight text-white">Smart<span class="text-yellow-300">Pack</span> <span class="text-emerald-300">3D</span></span>
+                            <span class="hidden md:inline-block text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-yellow-400 text-green-950">โรงเรียนพัทลุง</span>
+                        </div>
+                        <p id="brandSubtitle" class="hidden sm:block text-[11px] text-white/85">โครงงานคณิตศาสตร์ระดับชั้นมัธยมศึกษาตอนต้น</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Controls: Quick Desktop Links + Remote Admin + Backend Inspector -->
+            <div class="flex items-center gap-2">
+                <nav class="hidden lg:flex items-center gap-1 mr-1">
+                    <button onclick="switchMainPage('page-home')" id="top-nav-page-home" class="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-yellow-400 text-green-950 transition">หน้าแรก</button>
+                    <button onclick="switchMainPage('page-app')" id="top-nav-page-app" class="px-3 py-1.5 rounded-xl text-xs font-bold text-white/90 hover:bg-white/15 transition">ห้องทดลอง GSP 3D</button>
+                    <button onclick="switchMainPage('page-theory')" id="top-nav-page-theory" class="px-3 py-1.5 rounded-xl text-xs font-bold text-white/90 hover:bg-white/15 transition">ภาคทฤษฎี</button>
+                </nav>
+
+                <button onclick="openRemoteModal()" id="remoteOpenBtn" class="px-3 py-2 rounded-xl text-xs font-extrabold bg-emerald-700 hover:bg-emerald-600 text-yellow-200 border border-yellow-300/60 shadow transition flex items-center gap-1.5 shrink-0">
+                    <span id="remoteDot" class="w-2 h-2 rounded-full bg-yellow-300"></span>
+                    <span id="remoteBtnLabel">รีโมต</span>
+                </button>
+                <button onclick="openBackendModal()" class="px-3 py-2 rounded-xl text-xs font-extrabold bg-slate-900/90 hover:bg-slate-800 text-yellow-300 border border-slate-600 shadow transition shrink-0">
+                    &lt;/&gt; หลังบ้าน
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- LEFT SLIDE-OUT ACADEMIC NAVIGATION DRAWER -->
+    <div id="leftNavBackdrop" onclick="closeLeftDrawer()" class="hidden fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-xs transition-opacity"></div>
+    <aside id="leftNavDrawer" class="fixed top-0 left-0 bottom-0 z-50 w-80 max-w-[85vw] bg-white text-slate-900 shadow-2xl border-r-4 border-green-700 transform -translate-x-full transition-transform duration-300 flex flex-col justify-between">
+        <div class="flex flex-col h-full overflow-y-auto">
+            <!-- Academic Drawer Header (Chula-inspired Formal Emblem Header) -->
+            <div class="bg-gradient-to-br from-green-900 via-emerald-800 to-green-950 text-white p-5 border-b-4 border-yellow-400">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-2xl bg-white p-1.5 shadow-md flex items-center justify-center shrink-0">
+                            <img src="https://i.postimg.cc/K8k8NDqT/Phatthalung-School-logo-(1).png" onerror="this.src='https://placehold.co/48x48/15803d/fef08a?text=PT'" alt="โลโก้โรงเรียนพัทลุง" class="w-full h-full object-contain">
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-mono-code font-bold text-yellow-300 tracking-wider uppercase">PHATTHALUNG SCHOOL</span>
+                            <h2 class="font-extrabold text-lg leading-tight">SmartPack <span class="text-yellow-300">3D</span></h2>
+                            <p class="text-[11px] text-emerald-100">กลุ่มสาระการเรียนรู้คณิตศาสตร์</p>
+                        </div>
+                    </div>
+                    <button onclick="closeLeftDrawer()" class="w-8 h-8 rounded-full bg-white/15 hover:bg-yellow-400 hover:text-green-950 text-white font-extrabold flex items-center justify-center transition">✕</button>
+                </div>
+            </div>
+
+            <!-- Academic Section Navigation List -->
+            <div class="p-4 space-y-1.5 flex-1">
+                <div class="px-2 pb-1 text-[10px] font-mono-code font-extrabold text-slate-400 uppercase tracking-wider">สารบัญโครงงานคณิตศาสตร์</div>
+
+                <button onclick="switchMainPage('page-home'); closeLeftDrawer();" id="drawer-page-home" class="w-full text-left p-3 rounded-2xl bg-green-50 border-l-4 border-l-green-700 transition flex items-start gap-3">
+                    <span class="font-mono-code text-xs font-extrabold text-green-800 bg-yellow-300 px-2 py-0.5 rounded-md mt-0.5">01</span>
+                    <div>
+                        <div class="text-sm font-extrabold text-green-950">หน้าแรกและคู่มือการใช้งาน</div>
+                        <div class="text-[11px] text-slate-500">ภาพรวมโครงงานและวิธีใช้ 4 ขั้นตอน</div>
+                    </div>
+                </button>
+
+                <button onclick="switchMainPage('page-app'); closeLeftDrawer();" id="drawer-page-app" class="w-full text-left p-3 rounded-2xl hover:bg-slate-100 transition flex items-start gap-3">
+                    <span class="font-mono-code text-xs font-extrabold text-slate-600 bg-slate-200 px-2 py-0.5 rounded-md mt-0.5">02</span>
+                    <div>
+                        <div class="text-sm font-extrabold text-slate-900">ห้องทดลอง GSP 3D</div>
+                        <div class="text-[11px] text-slate-500">แบบจำลองการพับ 2ⁿ และปริมาตร 3 มิติ</div>
+                    </div>
+                </button>
+
+                <button onclick="switchMainPage('page-theory'); closeLeftDrawer();" id="drawer-page-theory" class="w-full text-left p-3 rounded-2xl hover:bg-slate-100 transition flex items-start gap-3">
+                    <span class="font-mono-code text-xs font-extrabold text-slate-600 bg-slate-200 px-2 py-0.5 rounded-md mt-0.5">03</span>
+                    <div>
+                        <div class="text-sm font-extrabold text-slate-900">ภาคทฤษฎีและที่มาสูตร</div>
+                        <div class="text-[11px] text-slate-500">สมการ 3 สูตร ตารางทดลอง &amp; เปรียบเทียบ</div>
+                    </div>
+                </button>
+
+                <button onclick="switchMainPage('page-journey'); closeLeftDrawer();" id="drawer-page-journey" class="w-full text-left p-3 rounded-2xl hover:bg-slate-100 transition flex items-start gap-3">
+                    <span class="font-mono-code text-xs font-extrabold text-slate-600 bg-slate-200 px-2 py-0.5 rounded-md mt-0.5">04</span>
+                    <div>
+                        <div class="text-sm font-extrabold text-slate-900">ขั้นตอนการวิจัย (4 ระยะ)</div>
+                        <div class="text-[11px] text-slate-500">ระเบียบวิธีวิจัยและผลการทดลองจริง</div>
+                    </div>
+                </button>
+
+                <button onclick="switchMainPage('page-team'); closeLeftDrawer();" id="drawer-page-team" class="w-full text-left p-3 rounded-2xl hover:bg-slate-100 transition flex items-start gap-3">
+                    <span class="font-mono-code text-xs font-extrabold text-slate-600 bg-slate-200 px-2 py-0.5 rounded-md mt-0.5">05</span>
+                    <div>
+                        <div class="text-sm font-extrabold text-slate-900">คณะผู้จัดทำและครูที่ปรึกษา</div>
+                        <div class="text-[11px] text-slate-500">นักเรียนและอาจารย์ที่ปรึกษา โรงเรียนพัทลุง</div>
+                    </div>
+                </button>
+
+                <div class="pt-3 mt-3 border-t border-slate-200 space-y-1.5">
+                    <div class="px-2 pb-1 text-[10px] font-mono-code font-extrabold text-slate-400 uppercase tracking-wider">เครื่องมือสำหรับวันนำเสนอ</div>
+                    <button onclick="closeLeftDrawer(); openRemoteModal();" class="w-full text-left px-3 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-950 font-extrabold text-xs border border-emerald-200 transition">
+                        • โหมดรีโมตแอดมิน (ควบคุมข้ามอุปกรณ์)
+                    </button>
+                    <button onclick="closeLeftDrawer(); openBackendModal();" class="w-full text-left px-3 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-yellow-300 font-extrabold text-xs transition">
+                        • เจาะลึกระบบหลังบ้าน (Code.gs &amp; Sheets)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Drawer Footer -->
+            <div class="p-4 bg-slate-50 border-t border-slate-200 text-[11px] text-slate-500 text-center">
+                โครงงานคณิตศาสตร์ระดับ ม.ต้น • โรงเรียนพัทลุง
+            </div>
+        </div>
+    </aside>
+
+    <!-- ===================================================================== -->
+    <!-- BACKEND & SYSTEM ARCHITECTURE INSPECTOR MODAL (FOR JUDGES / ADVISORS) -->
+    <!-- ===================================================================== -->
+    <div id="backendInspectorModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 flex items-center justify-center p-3 sm:p-5">
+        <div class="bg-white rounded-3xl max-w-3xl w-full p-5 sm:p-6 border border-green-300 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                <div>
+                    <span class="text-[11px] font-mono-code font-extrabold text-green-700">SYSTEM ARCHITECTURE &amp; BACKEND (CODE.GS)</span>
+                    <h3 class="text-base sm:text-lg font-extrabold text-slate-900">เจาะลึกสถาปัตยกรรมระบบหลังบ้านและฐานข้อมูล</h3>
+                </div>
+                <button onclick="closeBackendModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center">✕</button>
+            </div>
+
+            <!-- 4-Layer Architecture Diagram -->
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs">
+                <div class="rounded-2xl bg-green-50 border border-green-200 p-3">
+                    <span class="font-mono-code text-[10px] font-extrabold text-green-700">LAYER 01</span>
+                    <div class="font-extrabold text-slate-900 mt-0.5">Frontend UI &amp; GSP</div>
+                    <p class="text-[11px] text-slate-600 mt-1">HTML5 + Tailwind + SVG Interactive Sketchpad แสดงผล 3 มิติแบบเรียลไทม์</p>
+                </div>
+                <div class="rounded-2xl bg-emerald-50 border border-emerald-200 p-3">
+                    <span class="font-mono-code text-[10px] font-extrabold text-emerald-700">LAYER 02</span>
+                    <div class="font-extrabold text-slate-900 mt-0.5">Math Logic Engine</div>
+                    <p class="text-[11px] text-slate-600 mt-1">คำนวณ V_eff = η(W×L×H), ขั้นบันได N(d) และเลขยกกำลัง 2ⁿ</p>
+                </div>
+                <div class="rounded-2xl bg-yellow-50 border border-yellow-300 p-3">
+                    <span class="font-mono-code text-[10px] font-extrabold text-amber-800">LAYER 03</span>
+                    <div class="font-extrabold text-slate-900 mt-0.5">AI Vision &amp; Sync</div>
+                    <p class="text-[11px] text-slate-600 mt-1">เชื่อมต่อ Gemini Vision API วิเคราะห์ขนาดภาพ และซิงก์รีโมตแอดมิน</p>
+                </div>
+                <div class="rounded-2xl bg-slate-900 text-white p-3">
+                    <span class="font-mono-code text-[10px] font-extrabold text-yellow-300">LAYER 04 (DB)</span>
+                    <div class="font-extrabold mt-0.5">Apps Script &amp; Sheets</div>
+                    <p class="text-[11px] text-slate-300 mt-1">ไฟล์ Code.gs บันทึกประวัติการทดลองลง Google Sheets อัตโนมัติ</p>
+                </div>
+            </div>
+
+            <!-- Live JSON Payload Preview -->
+            <div class="space-y-1.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-extrabold text-slate-800">1. ข้อมูล JSON สดที่ส่งไปยังหลังบ้าน (Live Payload Preview):</span>
+                    <a href="https://docs.google.com/spreadsheets/d/1HTCW_lq8qKRe2FJ1YfkeUbnRcGaWuc_xMs_CPCGYWGs/edit" target="_blank" rel="noopener" class="text-[11px] font-extrabold bg-green-700 hover:bg-green-800 text-yellow-200 px-3 py-1 rounded-xl shadow transition">
+                        เปิดฐานข้อมูล Google Sheets จริง ↗
+                    </a>
+                </div>
+                <pre id="backendLiveJsonBox" class="font-mono-code text-[11px] bg-slate-950 text-emerald-300 p-3.5 rounded-2xl overflow-x-auto border border-slate-800"></pre>
+            </div>
+
+            <!-- Code.gs Backend Snippet -->
+            <div class="space-y-1.5">
+                <span class="text-xs font-extrabold text-slate-800">2. โค้ดหลังบ้าน Google Apps Script (ไฟล์ Code.gs):</span>
+                <pre class="font-mono-code text-[11px] bg-slate-900 text-slate-100 p-3.5 rounded-2xl overflow-x-auto border border-slate-700 leading-relaxed">const SPREADSHEET_ID = '1HTCW_lq8qKRe2FJ1YfkeUbnRcGaWuc_xMs_CPCGYWGs';
+
+function saveCalculationLog(payload) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  let logSheet = ss.getSheetByName('History_Log') || ss.insertSheet('History_Log');
+  logSheet.appendRow([
+    new Date(), payload.country, payload.days, payload.bagDim,
+    payload.bagVol, payload.usagePct, payload.status
+  ]);
+  return { status: 'success', message: 'บันทึกสถิติลง Google Sheets เรียบร้อย!' };
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- PRESENTER ADMIN REMOTE CONTROL MODAL (MULTI-DEVICE LIVE SYNC)         -->
+    <!-- ===================================================================== -->
+    <div id="remoteAdminModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 flex items-center justify-center p-3 sm:p-5">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 border border-green-300 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                <div>
+                    <span class="text-[11px] font-mono-code font-extrabold text-green-700">PRESENTER LIVE REMOTE SYNC</span>
+                    <h3 class="text-base sm:text-lg font-extrabold text-slate-900">โหมดแอดมินควบคุมการนำเสนอข้ามอุปกรณ์</h3>
+                </div>
+                <button onclick="closeRemoteModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center">✕</button>
+            </div>
+
+            <div class="bg-green-50 border border-green-200 rounded-2xl p-3.5 space-y-2.5 text-xs">
+                <p class="text-green-950 font-semibold leading-relaxed">
+                    ตั้ง <strong>รหัสห้องนำเสนอ (Room Code)</strong> ให้ตรงกันทั้งบนโน้ตบุ๊กหน้าบอร์ดและมือถือ/ไอแพด เพื่อกดเปลี่ยนหน้า เลื่อนสไลด์ หรือปรับค่าบนมือถือให้แสดงผลบนจอใหญ่แบบเรียลไทม์
+                </p>
+                <div class="flex items-center gap-2">
+                    <input type="text" id="remoteRoomCodeInput" value="PT01" maxlength="8" placeholder="รหัสห้อง เช่น PT01" class="w-32 rounded-xl border border-green-400 px-3 py-2 font-mono-code font-extrabold text-center uppercase bg-white text-slate-900">
+                    <button onclick="connectAsDisplay()" class="flex-1 bg-slate-900 hover:bg-slate-800 text-yellow-300 font-extrabold py-2 px-3 rounded-xl transition">
+                        ตั้งเป็นจอแสดงผลหลัก
+                    </button>
+                    <button onclick="connectAsController()" class="flex-1 bg-green-700 hover:bg-green-800 text-yellow-200 font-extrabold py-2 px-3 rounded-xl transition">
+                        ตั้งเป็นรีโมตควบคุม
+                    </button>
+                </div>
+                <div id="remoteSyncStatusText" class="text-[11px] font-bold text-slate-600">สถานะ: ยังไม่ได้เชื่อมต่อห้องนำเสนอ</div>
+            </div>
+
+            <!-- Remote Controller Pad (Shown when Controller role is active) -->
+            <div id="remoteControllerPad" class="hidden space-y-3 border-t border-slate-200 pt-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-extrabold text-slate-900">แผงควบคุมระยะไกล & จอสะท้อนสถานะจอหลัก</span>
+                    <button onclick="disconnectRemoteSync()" class="text-[11px] font-bold text-red-600 underline">ตัดการเชื่อมต่อ</button>
+                </div>
+
+                <!-- Live Mirror Preview Screen of Main Display -->
+                <div class="rounded-2xl bg-slate-950 text-white p-3.5 border-2 border-emerald-500/70 shadow-inner space-y-2.5">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="text-[10px] font-mono-code font-bold text-emerald-300">LIVE DISPLAY MIRROR</span>
+                        </div>
+                        <span id="mirrorActivePageBadge" class="text-[10px] font-extrabold bg-yellow-400 text-green-950 px-2 py-0.5 rounded-full">หน้า: หน้าแรก (สไลด์ 1/4)</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div class="bg-slate-900 rounded-xl p-2 border border-slate-800">
+                            <span class="block text-[9px] text-slate-400">จำนวนชุด N(d)</span>
+                            <span id="mirrorSetsVal" class="font-mono-code text-xs font-extrabold text-emerald-300">5 ชุด (5 วัน)</span>
+                        </div>
+                        <div class="bg-slate-900 rounded-xl p-2 border border-slate-800">
+                            <span class="block text-[9px] text-slate-400">พับผ้า (2ⁿ)</span>
+                            <span id="mirrorFoldVal" class="font-mono-code text-xs font-extrabold text-yellow-300">3 ทบ (15×36)</span>
+                        </div>
+                        <div class="bg-slate-900 rounded-xl p-2 border border-slate-800">
+                            <span class="block text-[9px] text-slate-400">การใช้ปริมาตร</span>
+                            <span id="mirrorUsageVal" class="font-mono-code text-xs font-extrabold text-sky-300">54.2%</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 pt-0.5">
+                        <span id="mirrorLastSyncTime">รอรับสัญญาณภาพสดจากจอหลัก...</span>
+                        <button onclick="sendRemoteAction({ type: 'ping' })" class="text-yellow-300 hover:underline font-bold">รีเฟรชจอสด</button>
+                    </div>
+                </div>
+
+                <!-- Remote Live Sliders -->
+                <div class="bg-slate-50 rounded-2xl p-3 border border-slate-200 space-y-2">
+                    <div class="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                        <span>ปรับวันเดินทางบนจอใหญ่ (d):</span>
+                        <span id="remoteDayLabel" class="font-mono-code text-green-700 font-extrabold">5 วัน</span>
+                    </div>
+                    <input type="range" id="remoteDaySlider" min="1" max="14" value="5" oninput="document.getElementById('remoteDayLabel').textContent=this.value+' วัน'; sendRemoteAction({ type: 'setDays', days: Number(this.value) })" class="w-full">
+                    <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 pt-1">
+                        <span>ปรับทบพับผ้าบนจอใหญ่ (n):</span>
+                        <span id="remoteFoldLabel" class="font-mono-code text-amber-700 font-extrabold">n = 3 ทบ</span>
+                    </div>
+                    <input type="range" id="remoteFoldSlider" min="0" max="4" value="3" oninput="document.getElementById('remoteFoldLabel').textContent='n = '+this.value+' ทบ'; sendRemoteAction({ type: 'setFold', fold: Number(this.value) })" class="w-full">
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                    <button onclick="sendRemoteAction({ type: 'page', pageId: 'page-home' })" class="p-2 rounded-xl bg-slate-100 hover:bg-green-100 text-xs font-bold">หน้าแรก</button>
+                    <button onclick="sendRemoteAction({ type: 'page', pageId: 'page-app' })" class="p-2 rounded-xl bg-green-700 text-yellow-200 text-xs font-extrabold">ห้องทดลอง GSP 3D</button>
+                    <button onclick="sendRemoteAction({ type: 'page', pageId: 'page-theory' })" class="p-2 rounded-xl bg-slate-100 hover:bg-green-100 text-xs font-bold">ภาคทฤษฎี</button>
+                    <button onclick="sendRemoteAction({ type: 'page', pageId: 'page-team' })" class="p-2 rounded-xl bg-slate-100 hover:bg-green-100 text-xs font-bold">คณะผู้จัดทำ</button>
+                    <button onclick="sendRemoteAction({ type: 'page', pageId: 'page-journey' })" class="p-2 rounded-xl bg-slate-100 hover:bg-green-100 text-xs font-bold">ขั้นตอนวิจัย</button>
+                    <button onclick="sendRemoteAction({ type: 'presentation' })" class="p-2 rounded-xl bg-amber-500 text-green-950 text-xs font-extrabold">ขยายเต็มจอ</button>
+                </div>
+                <div class="grid grid-cols-2 gap-1.5">
+                    <button onclick="sendRemoteAction({ type: 'preset', preset: 'thai3' })" class="p-2 rounded-xl border border-green-300 bg-green-50 text-xs font-bold text-green-900">เคส 1: ไทย 3 วัน</button>
+                    <button onclick="sendRemoteAction({ type: 'preset', preset: 'japan11' })" class="p-2 rounded-xl border border-green-300 bg-green-50 text-xs font-bold text-green-900">เคส 2: ญี่ปุ่น 11 วัน</button>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="sendRemoteAction({ type: 'slidePrev' })" class="flex-1 p-2 rounded-xl bg-slate-800 text-white text-xs font-bold">◀ สไลด์ก่อนหน้า</button>
+                    <button onclick="sendRemoteAction({ type: 'slideNext' })" class="flex-1 p-2 rounded-xl bg-slate-800 text-white text-xs font-bold">สไลด์ถัดไป ▶</button>
+                    <button onclick="sendRemoteAction({ type: 'playFold' })" class="flex-1 p-2 rounded-xl bg-emerald-700 text-yellow-200 text-xs font-extrabold">เล่นพับผ้า 2ⁿ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- CAMERA PERMISSION & AI SCANNER + INTERACTIVE DRAWING MODAL            -->
+    <!-- ===================================================================== -->
+    <div id="aiCameraModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 flex items-center justify-center p-3 sm:p-5">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-5 sm:p-6 border border-green-300 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                <div>
+                    <span class="text-[11px] font-mono-code font-extrabold text-green-700">AI VISION & GSP BOUNDING SKETCH</span>
+                    <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mt-0.5">กล้อง AI สแกนสิ่งของ & ระบบวาดเส้นกรอบวัดขนาด</h3>
+                </div>
+                <button onclick="closeCameraModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center">✕</button>
+            </div>
+
+            <div id="cameraStatusBar" class="rounded-2xl px-3.5 py-2.5 text-xs font-semibold bg-green-50 text-green-900 border border-green-200 flex items-center justify-between gap-2">
+                <span id="cameraStatusText">กำลังขออนุญาตเข้าถึงกล้องอุปกรณ์...</span>
+                <button onclick="requestDeviceCamera()" class="shrink-0 text-[11px] font-extrabold bg-green-700 text-yellow-200 px-3 py-1 rounded-xl hover:bg-green-800 transition">เปิดกล้องอีกครั้ง</button>
+            </div>
+
+            <div class="relative rounded-2xl overflow-hidden border-2 border-slate-800 bg-slate-900 aspect-video flex items-center justify-center">
+                <video id="liveCameraVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
+                <canvas id="sketchOverlayCanvas" class="hidden absolute inset-0 w-full h-full cursor-crosshair touch-none"></canvas>
+                <div id="cameraFallbackPlaceholder" class="hidden text-center p-6 space-y-2 text-white">
+                    <p class="text-sm font-bold text-yellow-300">ไม่สามารถเปิดกล้องสดได้ หรือยังไม่ได้รับอนุญาต</p>
+                    <p class="text-xs text-slate-300">สามารถอัปโหลดรูปสิ่งของ หรือกด "วาดเส้นกรอบสิ่งของเอง" ด้านล่างได้ทันที</p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex flex-wrap items-center gap-2">
+                    <button id="captureSnapBtn" onclick="captureAndAnalyzeWithAI()" class="bg-green-700 hover:bg-green-800 text-yellow-200 font-extrabold text-xs px-4 py-2.5 rounded-xl shadow transition">
+                        ถ่ายภาพและให้ AI วิเคราะห์ขนาด
+                    </button>
+                    <button onclick="enableManualSketchMode()" class="bg-amber-500 hover:bg-amber-600 text-green-950 font-extrabold text-xs px-4 py-2.5 rounded-xl shadow transition">
+                        โหมดวาดเส้นกรอบสิ่งของเอง
+                    </button>
+                    <label class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs px-3.5 py-2.5 rounded-xl border border-slate-300 transition">
+                        <span>เลือกรูปจากเครื่อง</span>
+                        <input type="file" accept="image/*" onchange="handleImageUploadForScan(event)" class="hidden">
+                    </label>
+                </div>
+                <button id="retakeCameraBtn" onclick="resumeLiveCamera()" class="hidden text-xs font-bold text-slate-600 hover:text-slate-900 underline">
+                    ถ่ายใหม่
+                </button>
+            </div>
+
+            <div id="scanResultBox" class="hidden bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-3">
+                <div class="flex items-center justify-between">
+                    <span id="scanResultBadge" class="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">ผลการวิเคราะห์พร้อมบันทึก</span>
+                    <span id="scanVolumePreview" class="font-mono-code text-xs font-extrabold text-green-700">V = 0 ลบ.ซม.</span>
+                </div>
+                <p id="scanResultHint" class="text-[11px] text-slate-600">หาก AI จับวัตถุไม่ได้ สามารถใช้นิ้วหรือเมาส์ลากวาดกรอบสี่เหลี่ยมทับสิ่งของบนภาพด้านบน ระบบจะคำนวณสัดส่วนให้ทันที</p>
+                <div class="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-[11px] text-amber-900 font-medium">
+                    <strong>ข้อจำกัดของระบบ:</strong> ระบบคำนวณบนพื้นฐานเรขาคณิตอุดมคติ (Idealized Geometry) ความแม่นยำขึ้นอยู่กับการจัดเรียงผ้าจริงและความยืดหยุ่นของเนื้อผ้า
+                </div>
+                <div class="grid grid-cols-12 gap-2">
+                    <div class="col-span-12 sm:col-span-5">
+                        <label class="block text-[10px] font-bold text-slate-500 mb-0.5">ชื่อสิ่งของ</label>
+                        <input type="text" id="scannedItemName" value="สิ่งของจากกล้อง" oninput="updateScanVolumePreview()" class="w-full rounded-xl border border-slate-300 px-3 py-1.5 text-xs font-bold bg-white">
+                    </div>
+                    <div class="col-span-4 sm:col-span-2">
+                        <label class="block text-[10px] font-bold text-slate-500 mb-0.5">กว้าง W (ซม.)</label>
+                        <input type="number" id="scannedItemW" value="15" min="1" max="80" oninput="updateScanVolumePreview()" class="w-full rounded-xl border border-slate-300 px-2 py-1.5 text-xs font-bold text-center bg-white">
+                    </div>
+                    <div class="col-span-4 sm:col-span-2">
+                        <label class="block text-[10px] font-bold text-slate-500 mb-0.5">ยาว L (ซม.)</label>
+                        <input type="number" id="scannedItemL" value="22" min="1" max="90" oninput="updateScanVolumePreview()" class="w-full rounded-xl border border-slate-300 px-2 py-1.5 text-xs font-bold text-center bg-white">
+                    </div>
+                    <div class="col-span-4 sm:col-span-3">
+                        <label class="block text-[10px] font-bold text-slate-500 mb-0.5">สูง/หนา H (ซม.)</label>
+                        <input type="number" id="scannedItemH" value="10" min="1" max="50" oninput="updateScanVolumePreview()" class="w-full rounded-xl border border-slate-300 px-2 py-1.5 text-xs font-bold text-center bg-white">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-1">
+                    <button onclick="confirmAddScannedItem()" class="bg-green-700 hover:bg-green-800 text-yellow-200 font-extrabold text-xs px-5 py-2.5 rounded-xl shadow transition">
+                        เพิ่มสิ่งของนี้ลงในกระเป๋า 3 มิติ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- PAGE 0: FULL-SCREEN HERO SLIDESHOW (PHATTHALUNG SCHOOL PHOTOS)        -->
+    <!-- ===================================================================== -->
+    <section id="page-home" class="relative min-h-screen w-full flex flex-col justify-between overflow-hidden bg-emerald-950 text-white">
+        <div id="heroBgImage" class="absolute inset-0 bg-cover bg-center transition-all duration-700" style="background-image: url('https://lh3.googleusercontent.com/gps-cs-s/ANWiy9Rn2ekqrp-Gte5mlAkpsmwmj8koWE53rBo_6b6-vwHjic0qjr_UAVtwCIZ-ZGJ28cPRC8tdWERzfWtlyQk-OvyocEGDgjjPEPBYvvXCt4v7kq-GcfvC88IPGWqLD_Ms00m-r-go=s1360-w1360-h1020-rw');"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-emerald-950/60 to-black/85"></div>
+
+        <div class="relative z-10 flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-36 sm:pt-40 pb-8 flex flex-col items-center justify-center text-center">
+            <div id="heroSlideCenter" class="space-y-5 max-w-4xl"></div>
+            <div class="mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+                <button onclick="prevSlide()" title="สไลด์ก่อนหน้า" class="w-10 h-10 rounded-full bg-white/15 hover:bg-yellow-400 hover:text-green-950 border border-white/30 flex items-center justify-center font-bold transition">
+                    ◀
+                </button>
+                <div id="heroDots" class="flex items-center gap-2"></div>
+                <button onclick="nextSlide()" title="สไลด์ถัดไป" class="w-10 h-10 rounded-full bg-white/15 hover:bg-yellow-400 hover:text-green-950 border border-white/30 flex items-center justify-center font-bold transition">
+                    ▶
+                </button>
+                <button id="toggleSlidePlayBtn" onclick="toggleHeroAutoplay()" class="px-4 py-2 rounded-full bg-black/50 hover:bg-yellow-400 hover:text-green-950 border border-white/35 text-xs font-extrabold text-yellow-200 flex items-center gap-2 transition shadow-lg">
+                    <span id="slidePlayIcon">❚❚</span>
+                    <span id="slidePlayText">หยุดสไลด์ชั่วคราว</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Bottom Quick-Access Cards -->
+        <div class="relative z-10 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                <button onclick="switchMainPage('page-app')" class="glass-dock-card rounded-2xl p-4 text-center flex flex-col items-center justify-center gap-1.5">
+                    <div class="w-10 h-10 rounded-xl bg-yellow-400/20 border border-yellow-300/50 flex items-center justify-center text-yellow-300 mb-0.5">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs font-extrabold text-white">แบบจำลองกระเป๋า</span>
+                    <span class="text-[10px] text-yellow-200/90">ปริมาตร V = W×L×H</span>
+                </button>
+                <button onclick="switchMainPage('page-app')" class="glass-dock-card rounded-2xl p-4 text-center flex flex-col items-center justify-center gap-1.5">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-400/20 border border-emerald-300/50 flex items-center justify-center text-emerald-300 mb-0.5">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5">
+                            <rect x="3" y="4" width="18" height="16" rx="2"/><line x1="12" y1="4" x2="12" y2="20" stroke-dasharray="3 2"/><line x1="3" y1="12" x2="21" y2="12" stroke-dasharray="3 2"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs font-extrabold text-white">แอนิเมชันแบบ GSP</span>
+                    <span class="text-[10px] text-yellow-200/90">การพับผ้า 2ⁿ ทบ</span>
+                </button>
+                <button onclick="switchMainPage('page-theory')" class="glass-dock-card rounded-2xl p-4 text-center flex flex-col items-center justify-center gap-1.5">
+                    <div class="w-10 h-10 rounded-xl bg-yellow-400/20 border border-yellow-300/50 flex items-center justify-center text-yellow-300 mb-0.5">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs font-extrabold text-white">ภาคทฤษฎี 3 สูตร</span>
+                    <span class="text-[10px] text-yellow-200/90">นิยามและเหตุผลที่มา</span>
+                </button>
+                <button onclick="switchMainPage('page-app')" class="glass-dock-card rounded-2xl p-4 text-center flex flex-col items-center justify-center gap-1.5">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-400/20 border border-emerald-300/50 flex items-center justify-center text-emerald-300 mb-0.5">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5">
+                            <polyline points="3 18 9 18 9 12 15 12 15 6 21 6"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs font-extrabold text-white">ฟังก์ชันขั้นบันได</span>
+                    <span class="text-[10px] text-yellow-200/90">คำนวณชุด N(d)</span>
+                </button>
+                <button onclick="switchMainPage('page-team')" class="glass-dock-card rounded-2xl p-4 text-center flex flex-col items-center justify-center gap-1.5">
+                    <div class="w-10 h-10 rounded-xl bg-yellow-400/20 border border-yellow-300/50 flex items-center justify-center text-yellow-300 mb-0.5">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs font-extrabold text-white">คณะผู้จัดทำ</span>
+                    <span class="text-[10px] text-yellow-200/90">โรงเรียนพัทลุง</span>
+                </button>
+                <button onclick="switchMainPage('page-journey')" class="glass-dock-card rounded-2xl p-4 text-center flex flex-col items-center justify-center gap-1.5">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-400/20 border border-emerald-300/50 flex items-center justify-center text-emerald-300 mb-0.5">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5">
+                            <path d="M9 3h6v4l4 8a3 3 0 0 1-2.7 4.3H7.7A3 3 0 0 1 5 15l4-8V3z"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs font-extrabold text-white">ขั้นตอนการวิจัย</span>
+                    <span class="text-[10px] text-yellow-200/90">บันทึกการทดลอง</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- PAGE 1: GSP GEOMETRIC SIMULATION & 3-FORMULA WORKSPACE                -->
+    <!-- ===================================================================== -->
+    <main id="page-app" class="hidden flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-32 sm:pt-36 pb-10 space-y-6">
+        
+        <!-- Quick Scenario Presets & Presentation Focus Mode Bar -->
+        <div class="bento-card rounded-2xl p-3.5 sm:px-5 flex flex-wrap items-center justify-between gap-3 border-l-4 border-l-green-700">
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="text-xs font-extrabold text-green-900 mr-1">ชุดข้อมูลตัวอย่างด่วน (Quick Presets):</span>
+                <button onclick="applyQuickScenario('thai3')" id="preset-thai3" class="preset-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-green-100 text-slate-800 border border-slate-200 transition">
+                    1. เที่ยวไทย 3 วัน (กระเป๋า 20")
+                </button>
+                <button onclick="applyQuickScenario('japan11')" id="preset-japan11" class="preset-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-green-100 text-slate-800 border border-slate-200 transition">
+                    2. เที่ยวญี่ปุ่น 11 วัน (กระเป๋า 24")
+                </button>
+                <button onclick="applyQuickScenario('overfold4')" id="preset-overfold4" class="preset-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-amber-100 text-slate-800 border border-slate-200 transition">
+                    3. ทดสอบพับ 4 ทบ (แจ้งเตือนเกินขนาด)
+                </button>
+            </div>
+            <button id="presentationModeBtn" onclick="togglePresentationMode()" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-slate-900 hover:bg-green-800 text-yellow-300 shadow-sm transition shrink-0">
+                <span id="presentationModeText">โหมดขยายเต็มจอนำเสนอ</span>
+            </button>
+        </div>
+
+        <!-- Top KPI Dashboard Strip -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bento-card rounded-2xl p-4">
+                <span class="text-[11px] font-bold text-green-700 uppercase tracking-wide">สูตรที่ 1 • ความจุใช้งานจริง (η·V_bag)</span>
+                <div id="kpiBagVol" class="text-2xl font-extrabold text-slate-900 mt-1">50,400 <span class="text-xs font-normal text-slate-400">ลบ.ซม.</span></div>
+                <div id="kpiBagDim" class="text-[11px] text-slate-500 font-medium mt-0.5">เต็ม 63,000 ลบ.ซม. (η = 0.80)</div>
+            </div>
+            <div class="bento-card rounded-2xl p-4">
+                <span class="text-[11px] font-bold text-emerald-700 uppercase tracking-wide">สูตรที่ 2 • ฟังก์ชันขั้นบันได N(d)</span>
+                <div id="kpiStepClothes" class="text-2xl font-extrabold text-emerald-700 mt-1">5 <span class="text-xs font-normal text-slate-500">ชุด</span></div>
+                <div id="kpiStepNote" class="text-[11px] text-slate-500 mt-0.5">เดินทาง 5 วัน (จัดตามจำนวนวันจริง)</div>
+            </div>
+            <div class="bento-card rounded-2xl p-4">
+                <span class="text-[11px] font-bold text-amber-700 uppercase tracking-wide">สูตรที่ 3 • ขนาดหลังพับ (2ⁿ)</span>
+                <div id="kpiFoldSize" class="text-2xl font-extrabold text-amber-600 mt-1">15 × 36 <span class="text-xs font-normal text-slate-500">ซม.</span></div>
+                <div id="kpiFoldThick" class="text-[11px] text-slate-500 mt-0.5">พับ 3 ทบ (2³ = 8 ชั้น) • หนา 5.6 ซม.</div>
+            </div>
+            <div class="bento-card rounded-2xl p-4">
+                <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">อัตราส่วนการใช้ปริมาตร</span>
+                <div class="flex items-baseline justify-between mt-1">
+                    <div id="kpiUsage" class="text-2xl font-extrabold text-green-700">54.2%</div>
+                    <span id="kpiStatus" class="text-[11px] text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full font-bold">ผ่านเงื่อนไข</span>
+                </div>
+                <div class="w-full h-2 bg-slate-100 rounded-full mt-2 overflow-hidden">
+                    <div id="kpiProgressBar" class="h-full bg-gradient-to-r from-green-600 to-amber-400 rounded-full transition-all duration-300" style="width: 54%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Workspace Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- Left 4 Cols: Parameter Control Panel -->
+            <div class="lg:col-span-4 bento-card rounded-3xl p-5 space-y-5">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h2 class="text-sm font-extrabold text-slate-900">พารามิเตอร์ตัวแปร (Parameters)</h2>
+                    <button onclick="autoOptimizeFold()" class="text-[11px] font-extrabold bg-green-700 hover:bg-green-800 text-yellow-200 px-3 py-1 rounded-full shadow-sm transition">
+                        คำนวณจุดพับเหมาะสม
+                    </button>
+                </div>
+
+                <!-- 1. Suitcase Size -->
+                <div class="bg-green-50/70 rounded-2xl p-3.5 border border-green-200/80 space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-extrabold text-green-900">1. มิติกระเป๋าเดินทาง (ซม.)</span>
+                        <div class="flex gap-1">
+                            <button onclick="setBagPreset(36, 55, 23)" class="text-[10px] bg-white border border-green-300 px-2 py-0.5 rounded-lg font-bold text-green-800 hover:bg-green-100">20"</button>
+                            <button onclick="setBagPreset(42, 60, 25)" class="text-[10px] bg-green-700 text-white px-2 py-0.5 rounded-lg font-bold">24"</button>
+                            <button onclick="setBagPreset(48, 70, 29)" class="text-[10px] bg-white border border-green-300 px-2 py-0.5 rounded-lg font-bold text-green-800 hover:bg-green-100">28"</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <span class="text-[10px] font-semibold text-slate-500">กว้าง (W)</span>
+                            <input type="number" id="bagW" value="42" min="20" max="80" oninput="calculateAll()" class="w-full rounded-xl border border-slate-300 px-2.5 py-1.5 text-xs font-bold bg-white">
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-semibold text-slate-500">ยาว (L)</span>
+                            <input type="number" id="bagL" value="60" min="30" max="100" oninput="calculateAll()" class="w-full rounded-xl border border-slate-300 px-2.5 py-1.5 text-xs font-bold bg-white">
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-semibold text-slate-500">ลึก (H)</span>
+                            <input type="number" id="bagH" value="25" min="15" max="50" oninput="calculateAll()" class="w-full rounded-xl border border-slate-300 px-2.5 py-1.5 text-xs font-bold bg-white">
+                        </div>
+                    </div>
+                    <div class="pt-1 border-t border-green-200/70">
+                        <div class="flex justify-between text-[11px] font-bold text-green-900 mb-1">
+                            <span>สัมประสิทธิ์ความหนาแน่น (η):</span>
+                            <span id="etaValLabel" class="font-mono-code bg-white px-2 py-0.5 rounded border border-green-300">η = 0.80 (80%)</span>
+                        </div>
+                        <input type="range" id="packingEta" min="0.70" max="0.90" step="0.05" value="0.80" oninput="calculateAll()" class="w-full">
+                    </div>
+                </div>
+
+                <!-- 2. Step Function Days & Destination -->
+                <div class="bg-slate-50/90 rounded-2xl p-3.5 border border-slate-200 space-y-3">
+                    <span class="block text-xs font-extrabold text-slate-800">2. ฟังก์ชันขั้นบันได N(d) และค่าสัมประสิทธิ์ k</span>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">สภาพภูมิอากาศปลายทาง (ตัวคูณความหนา k)</label>
+                        <select id="countrySelect" onchange="calculateAll()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold bg-white">
+                            <option value="1.0|0">เขตร้อน (ไทย / สิงคโปร์) — k = 1.0</option>
+                            <option value="1.4|1">เขตอบอุ่น (ใบไม้ผลิ / ใบไม้ร่วง) — k = 1.4</option>
+                            <option value="2.0|2" selected>เขตหนาว (ญี่ปุ่น / ยุโรป ฤดูหนาว) — k = 2.0</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-bold text-slate-700 mb-1.5">
+                            <span>จำนวนวันเดินทาง (d):</span>
+                            <span id="daysVal" class="text-green-700 font-extrabold bg-green-100 px-2 py-0.5 rounded-md">5 วัน</span>
+                        </div>
+                        <input type="range" id="daysInput" min="1" max="14" value="5" oninput="calculateAll()" class="w-full">
+                    </div>
+
+                    <div class="bg-white rounded-xl p-3 border border-emerald-200 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-extrabold text-emerald-900">พกเสื้อเผื่อเกินกำหนด (ΔN ชุด):</span>
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="changeExtraShirts(-1)" class="w-6 h-6 rounded-lg bg-slate-100 hover:bg-slate-200 font-extrabold text-slate-700 text-xs flex items-center justify-center">-</button>
+                                <span id="extraShirtsVal" class="font-mono-code text-xs font-extrabold text-emerald-700 w-8 text-center">+0</span>
+                                <button onclick="changeExtraShirts(1)" class="w-6 h-6 rounded-lg bg-emerald-700 hover:bg-emerald-800 font-extrabold text-yellow-200 text-xs flex items-center justify-center">+</button>
+                            </div>
+                        </div>
+                        <div id="extraDaysResultBox" class="text-[11px] bg-emerald-50 text-emerald-900 px-2.5 py-2 rounded-lg border border-emerald-200 leading-relaxed">
+                            หากพกเสื้อเพิ่ม <strong>0 ชุด</strong> จะอยู่ต่อได้เพิ่ม <strong>0 วัน</strong> (รวม 5 วัน)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Exponential Folding Controls -->
+                <div class="bg-yellow-50/80 rounded-2xl p-3.5 border border-yellow-300/80 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-extrabold text-amber-950">3. พารามิเตอร์การพับ (2ⁿ)</span>
+                        <span id="foldBadge" class="text-[11px] font-mono-code font-extrabold bg-amber-500 text-white px-2.5 py-0.5 rounded-full">n = 3 (2³)</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <span class="text-[10px] font-semibold text-slate-600">กว้างเริ่มต้น w₀ (ซม.)</span>
+                            <input type="number" id="shirtW" value="60" min="30" max="100" oninput="calculateAll()" class="w-full rounded-xl border border-slate-300 px-2.5 py-1 text-xs font-bold bg-white">
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-semibold text-slate-600">ยาวเริ่มต้น l₀ (ซม.)</span>
+                            <input type="number" id="shirtL" value="72" min="40" max="110" oninput="calculateAll()" class="w-full rounded-xl border border-slate-300 px-2.5 py-1 text-xs font-bold bg-white">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-bold text-amber-900 mb-1.5">
+                            <span>จำนวนครั้งที่พับครึ่ง (n):</span>
+                            <span id="foldStepsText" class="text-green-800 font-extrabold">3 ทบ (2³ = 8 ชั้น)</span>
+                        </div>
+                        <input type="range" id="foldN" min="0" max="4" value="3" oninput="triggerManualFoldChange(this.value)" class="w-full">
+                        <div class="grid grid-cols-5 gap-1 pt-1.5">
+                            <button onclick="setFoldStep(0)" class="fold-step-btn text-[10px] font-mono-code font-bold py-1 rounded-lg bg-white border border-amber-300 hover:bg-amber-100">n=0</button>
+                            <button onclick="setFoldStep(1)" class="fold-step-btn text-[10px] font-mono-code font-bold py-1 rounded-lg bg-white border border-amber-300 hover:bg-amber-100">n=1</button>
+                            <button onclick="setFoldStep(2)" class="fold-step-btn text-[10px] font-mono-code font-bold py-1 rounded-lg bg-white border border-amber-300 hover:bg-amber-100">n=2</button>
+                            <button onclick="setFoldStep(3)" class="fold-step-btn text-[10px] font-mono-code font-bold py-1 rounded-lg bg-amber-500 text-white">n=3</button>
+                            <button onclick="setFoldStep(4)" class="fold-step-btn text-[10px] font-mono-code font-bold py-1 rounded-lg bg-white border border-amber-300 hover:bg-amber-100">n=4</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Extra Items -->
+                <div class="border-t border-slate-200/80 pt-3 space-y-2">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="block text-xs font-extrabold text-slate-800">4. เพิ่มรูปทรงปริมาตรอื่น (W × L × H)</span>
+                        <button onclick="openCameraModal()" class="text-[11px] font-extrabold bg-emerald-700 hover:bg-emerald-800 text-yellow-200 px-3 py-1 rounded-full shadow-sm transition">
+                            กล้อง AI / วาดเส้นวัดขนาด
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-12 gap-1.5">
+                        <input type="text" id="customName" placeholder="ชื่อวัตถุ" class="col-span-5 rounded-xl border border-slate-300 px-2.5 py-1.5 text-xs bg-white">
+                        <input type="number" id="customW" placeholder="W" value="14" class="col-span-2 rounded-xl border border-slate-300 px-1 py-1.5 text-xs text-center bg-white">
+                        <input type="number" id="customL" placeholder="L" value="28" class="col-span-2 rounded-xl border border-slate-300 px-1 py-1.5 text-xs text-center bg-white">
+                        <input type="number" id="customH" placeholder="H" value="12" class="col-span-2 rounded-xl border border-slate-300 px-1 py-1.5 text-xs text-center bg-white">
+                        <button onclick="addCustomItem()" class="col-span-1 bg-green-700 hover:bg-green-800 text-white rounded-xl font-bold text-sm flex items-center justify-center">+</button>
+                    </div>
+                    <div id="customItemsList" class="flex flex-wrap gap-1.5 pt-1"></div>
+                </div>
+
+                <!-- 5. Save Experiment Log -->
+                <div class="border-t border-slate-200/80 pt-3">
+                    <button id="saveSheetBtn" onclick="saveCurrentExperimentLog()" class="w-full bg-slate-900 hover:bg-slate-800 text-yellow-300 font-extrabold text-xs py-2.5 px-4 rounded-2xl shadow-md transition">
+                        บันทึกผลการทดลองนี้ลงฐานข้อมูล (Google Sheets)
+                    </button>
+                    <p id="saveSheetStatus" class="hidden text-[11px] font-bold text-center mt-1.5 text-emerald-700"></p>
+                </div>
+            </div>
+
+            <!-- Right 8 Cols: GSP Simulations & Graphs -->
+            <div class="lg:col-span-8 space-y-6">
+                
+                <div id="alertBanner" class="hidden rounded-2xl p-3.5 text-xs font-bold bg-red-50 text-red-700 border border-red-300 shadow-sm"></div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- SIMULATION 1: GSP GEOMETRIC FOLDING SKETCHPAD -->
+                    <div class="bento-card rounded-3xl p-5 flex flex-col justify-between space-y-4">
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[11px] font-extrabold bg-yellow-300 text-green-950 px-2.5 py-0.5 rounded-full">GSP Sketch 01</span>
+                                    <span id="foldStepIndicator" class="text-[11px] font-mono-code font-bold text-green-700">n = 3 (2³ = 8)</span>
+                                </div>
+                                <h3 class="text-base font-extrabold text-slate-900 mt-1.5">การสะท้อนและพับรูปเรขาคณิต (2ⁿ)</h3>
+                                <p class="text-[11px] text-slate-500">เปรียบเทียบขนาดผ้าหลังพับกับเสื้อเต็มตัวและจำนวนชั้นผ้า</p>
+                            </div>
+                            <button id="playFoldAnimBtn" onclick="playFoldingAnimation()" class="shrink-0 bg-green-700 hover:bg-green-800 text-yellow-200 font-extrabold text-[11px] px-3 py-2 rounded-xl shadow-md transition">
+                                ▶ เล่นแอนิเมชัน
+                            </button>
+                        </div>
+
+                        <div class="blueprint-grid rounded-2xl border border-green-300/80 p-3.5 flex flex-col items-center justify-between min-h-[320px] relative">
+                            <div class="w-full flex items-center justify-between text-[10px] font-mono-code text-slate-500 mb-1 border-b border-slate-200/80 pb-1.5">
+                                <span>GSP-5.06 • Interactive Cloth Fold</span>
+                                <span id="foldNarrationPill" class="text-green-800 font-bold">n = 3 ทบ</span>
+                            </div>
+
+                            <div id="clothFoldingStage" class="w-full flex-1 flex flex-col items-center justify-center py-1"></div>
+                        </div>
+
+                        <div id="foldMetricsFooter" class="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80 text-xs space-y-1.5"></div>
+                    </div>
+
+                    <!-- SIMULATION 2: GSP 3D ORTHOGRAPHIC SUITCASE PROJECTION -->
+                    <div class="bento-card rounded-3xl p-5 flex flex-col justify-between space-y-4">
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[11px] font-extrabold bg-green-100 text-green-800 px-2.5 py-0.5 rounded-full border border-green-300">GSP Sketch 02</span>
+                                    <span id="suitcaseFitBadge" class="text-[11px] font-bold text-emerald-700">สภาวะสมดุล 100%</span>
+                                </div>
+                                <h3 class="text-base font-extrabold text-slate-900 mt-1.5">ภาพฉายปริซึมสี่เหลี่ยมมุมฉาก 3 มิติ</h3>
+                                <p class="text-[11px] text-slate-500">จำลองการบรรจุปริซึมเสื้อผ้าลงในขอบเขต W × L × H</p>
+                            </div>
+                            <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0">
+                                <button onclick="setSuitcaseView('front')" id="viewFrontBtn" class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-green-700 text-yellow-200 transition">ระนาบ XY</button>
+                                <button onclick="setSuitcaseView('binpack')" id="viewBinpackBtn" class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold text-slate-600 hover:text-slate-900 transition">ผัง 2D Bin Packing</button>
+                                <button onclick="setSuitcaseView('depth')" id="viewDepthBtn" class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold text-slate-600 hover:text-slate-900 transition">ระนาบ XZ</button>
+                            </div>
+                        </div>
+
+                        <div class="blueprint-grid rounded-2xl border border-green-300/80 p-3.5 flex flex-col items-center justify-between min-h-[300px] relative">
+                            <div class="w-full flex items-center justify-between text-[10px] font-mono-code text-slate-500 border-b border-slate-200/80 pb-1.5">
+                                <span>Prism: W × L × H</span>
+                                <span id="gspBagDimLabel" class="text-green-800 font-bold">42 × 60 × 25 cm</span>
+                            </div>
+
+                            <div id="realisticSuitcaseInterior" class="w-full flex-1 my-2 rounded-xl bg-white/85 border-2 border-slate-700 p-2.5 flex flex-col justify-between gap-2 relative"></div>
+
+                            <div class="w-full flex justify-between text-[10px] font-mono-code text-slate-400 pt-1">
+                                <span>Origin (0,0,0)</span>
+                                <span>V_total ≤ V_bag</span>
+                            </div>
+                        </div>
+
+                        <div id="suitcaseFooterSummary" class="bg-green-50/80 rounded-2xl p-3.5 border border-green-200 text-xs space-y-1.5"></div>
+                        <div class="text-[10px] text-slate-500 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200 leading-relaxed">
+                            <strong>หมายเหตุเชิงฟิสิกส์:</strong> ระบบคำนวณบนพื้นฐานเรขาคณิตอุดมคติ (Idealized Geometry) ภายใต้สัมประสิทธิ์ความหนาแน่น η ความแม่นยำขึ้นอยู่กับการจัดเรียงผ้าจริง
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- GSP REFERENCE VISUAL GALLERY (RESTORED BELOW GSP SKETCHPAD) -->
+                <div class="bento-card rounded-3xl p-5 space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                        <div>
+                            <span class="text-[11px] font-extrabold bg-yellow-200 text-amber-950 px-2.5 py-0.5 rounded-full">GSP Visual Reference</span>
+                            <h3 class="text-base font-extrabold text-slate-900 mt-1">ภาพตัวอย่างการสร้างรูปเรขาคณิตในโปรแกรม The Geometer's Sketchpad (GSP)</h3>
+                        </div>
+                        <span class="text-[11px] text-slate-500">คลิกที่ภาพเพื่อทดสอบพารามิเตอร์นั้นทันที</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div onclick="setFoldStep(1, 'anim-flip-x')" class="cursor-pointer group rounded-2xl border border-green-200 bg-green-50/50 p-3 hover:border-green-500 transition">
+                            <div class="aspect-video rounded-xl bg-white border border-slate-200 flex items-center justify-center overflow-hidden p-2">
+                                <svg viewBox="0 0 180 100" class="w-full h-full">
+                                    <rect x="20" y="15" width="65" height="70" fill="rgba(16,185,129,0.25)" stroke="#15803d" stroke-width="2"/>
+                                    <rect x="85" y="15" width="65" height="70" fill="rgba(250,204,21,0.2)" stroke="#15803d" stroke-width="1.5" stroke-dasharray="4 3"/>
+                                    <line x1="85" y1="8" x2="85" y2="92" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 2"/>
+                                    <circle cx="20" cy="15" r="3.5" fill="#dc2626"/><circle cx="85" cy="15" r="3.5" fill="#dc2626"/>
+                                    <circle cx="85" cy="85" r="3.5" fill="#dc2626"/><circle cx="20" cy="85" r="3.5" fill="#dc2626"/>
+                                    <text x="95" y="54" font-size="11" font-weight="bold" fill="#065f46">n=1 (2¹=2 ชั้น)</text>
+                                </svg>
+                            </div>
+                            <div class="mt-2">
+                                <div class="text-xs font-extrabold text-green-950 group-hover:text-green-700">ภาพที่ 1: การสะท้อนแกนแนวตั้ง (n = 1)</div>
+                                <p class="text-[11px] text-slate-500">พื้นที่ฐานลดเหลือ 1/2 ของเสื้อเต็มตัว</p>
+                            </div>
+                        </div>
+
+                        <div onclick="setFoldStep(3, 'anim-flip-x')" class="cursor-pointer group rounded-2xl border border-green-200 bg-green-50/50 p-3 hover:border-green-500 transition">
+                            <div class="aspect-video rounded-xl bg-white border border-slate-200 flex items-center justify-center overflow-hidden p-2">
+                                <svg viewBox="0 0 180 100" class="w-full h-full">
+                                    <rect x="25" y="15" width="42" height="70" fill="rgba(16,185,129,0.35)" stroke="#15803d" stroke-width="2.5"/>
+                                    <line x1="25" y1="15" x2="67" y2="85" stroke="#15803d" stroke-width="1" stroke-dasharray="3 2"/>
+                                    <circle cx="25" cy="15" r="3.5" fill="#dc2626"/><circle cx="67" cy="15" r="3.5" fill="#dc2626"/>
+                                    <circle cx="67" cy="85" r="3.5" fill="#dc2626"/><circle cx="25" cy="85" r="3.5" fill="#dc2626"/>
+                                    <text x="78" y="45" font-size="11" font-weight="bold" fill="#065f46">n=3 (2³=8 ชั้น)</text>
+                                    <text x="78" y="62" font-size="10" fill="#b45309">จุดสมดุล 15×36 ซม.</text>
+                                </svg>
+                            </div>
+                            <div class="mt-2">
+                                <div class="text-xs font-extrabold text-green-950 group-hover:text-green-700">ภาพที่ 2: จุดพับมาตรฐาน 3 ทบ (n = 3)</div>
+                                <p class="text-[11px] text-slate-500">พื้นที่ฐานเหลือ 1/8 ลงตัวกับกระเป๋าทุกขนาด</p>
+                            </div>
+                        </div>
+
+                        <div onclick="setSuitcaseView('binpack')" class="cursor-pointer group rounded-2xl border border-green-200 bg-green-50/50 p-3 hover:border-green-500 transition">
+                            <div class="aspect-video rounded-xl bg-white border border-slate-200 flex items-center justify-center overflow-hidden p-2">
+                                <svg viewBox="0 0 180 100" class="w-full h-full">
+                                    <rect x="20" y="12" width="140" height="76" rx="6" fill="#f8fafc" stroke="#15803d" stroke-width="2" stroke-dasharray="4 3"/>
+                                    <rect x="26" y="18" width="40" height="64" rx="4" fill="#10b981" stroke="#064e3b" stroke-width="1.5"/>
+                                    <rect x="70" y="18" width="40" height="64" rx="4" fill="#10b981" stroke="#064e3b" stroke-width="1.5"/>
+                                    <rect x="114" y="18" width="40" height="64" rx="4" fill="#facc15" stroke="#92400e" stroke-width="1.5"/>
+                                    <text x="36" y="53" font-size="9" font-weight="bold" fill="#ffffff">ชุด 1</text>
+                                    <text x="80" y="53" font-size="9" font-weight="bold" fill="#ffffff">ชุด 2</text>
+                                    <text x="120" y="53" font-size="9" font-weight="bold" fill="#78350f">ของใช้</text>
+                                </svg>
+                            </div>
+                            <div class="mt-2">
+                                <div class="text-xs font-extrabold text-green-950 group-hover:text-green-700">ภาพที่ 3: การบรรจุ 2D Bin Packing</div>
+                                <p class="text-[11px] text-slate-500">วางชิดมุมปริซึมลดพื้นที่สูญเปล่า (η = 0.80)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REALTIME MATHEMATICAL GRAPHS SECTION -->
+                <div class="bento-card rounded-3xl p-5 space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                        <div>
+                            <span class="text-[11px] font-extrabold bg-green-100 text-green-900 px-2.5 py-0.5 rounded-full border border-green-300">GSP Sketch 03 • Real-time Graphs</span>
+                            <h3 class="text-base font-extrabold text-slate-900 mt-1">กราฟความสัมพันธ์ทางคณิตศาสตร์แบบพลวัต (Dynamic Function Graphs)</h3>
+                        </div>
+                        <span class="text-[11px] text-slate-500 font-medium">จุดสีแดงบนกราฟขยับตามค่าพารามิเตอร์ที่คุณปรับแบบเรียลไทม์</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="blueprint-grid rounded-2xl border border-slate-300 p-3.5 space-y-2">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="font-extrabold text-slate-800">กราฟฟังก์ชันขั้นบันได N(d)</span>
+                                <span id="graphStepCoord" class="font-mono-code text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">(d=5, N=5)</span>
+                            </div>
+                            <svg id="stepFunctionSvg" viewBox="0 0 320 175" class="w-full h-40 bg-white/90 rounded-xl border border-slate-200"></svg>
+                            <p class="text-[10px] text-slate-500">แสดงความชันคงที่ช่วง 1–7 วัน และรูปแบบขั้นบันไดช่วง 8–14 วัน</p>
+                        </div>
+
+                        <div class="blueprint-grid rounded-2xl border border-slate-300 p-3.5 space-y-2">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="font-extrabold text-slate-800">กราฟเลขยกกำลังการพับผ้า (2ⁿ)</span>
+                                <span id="graphExpCoord" class="font-mono-code text-[11px] font-bold text-amber-700 bg-yellow-50 px-2 py-0.5 rounded border border-yellow-300">n=3 (A₃=540, T₃=5.6)</span>
+                            </div>
+                            <svg id="expFunctionSvg" viewBox="0 0 320 175" class="w-full h-40 bg-white/90 rounded-xl border border-slate-200"></svg>
+                            <p class="text-[10px] text-slate-500">เส้นสีเขียว: พื้นที่ฐาน Aₙ ลดลง (1/2ⁿ) • เส้นสีส้ม: ความหนา Tₙ เพิ่มขึ้น (2ⁿ)</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- ===================================================================== -->
+    <!-- PAGE 2: MATHEMATICAL THEORY & FORMULA DERIVATION PAGE                 -->
+    <!-- ===================================================================== -->
+    <section id="page-theory" class="hidden flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-36 sm:pt-40 pb-12 space-y-8">
+        <div class="text-center space-y-2 max-w-3xl mx-auto">
+            <span class="inline-block bg-green-100 text-green-800 text-xs font-extrabold px-3.5 py-1 rounded-full border border-yellow-300">
+                ภาคทฤษฎีคณิตศาสตร์ระดับชั้นมัธยมศึกษาตอนต้น • โรงเรียนพัทลุง
+            </span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">ทฤษฎี ความหมายตัวแปร และเหตุผลเบื้องหลังสูตรทั้ง 3</h2>
+            <p class="text-xs sm:text-sm text-slate-600">เจาะลึกหลักการทางคณิตศาสตร์และเหตุผลที่กำหนดรูปแบบสมการแต่ละสูตรเพื่อใช้ในการจัดกระเป๋าเดินทางอย่างแม่นยำ</p>
+        </div>
+
+        <!-- Theory 1 -->
+        <div class="bento-card rounded-3xl p-6 sm:p-8 space-y-5">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="font-mono-code text-xs font-extrabold text-green-700 bg-green-100 px-3 py-1 rounded-full">THEORY 01 • 3D GEOMETRY & EFFICIENCY</span>
+                    <h3 class="text-xl font-extrabold text-slate-900 mt-2">ทฤษฎีที่ 1: ปริมาตรปริซึมสี่เหลี่ยมมุมฉากและสัมประสิทธิ์ความหนาแน่น ($\eta$)</h3>
+                </div>
+                <div class="font-mono-code text-xs sm:text-sm font-extrabold bg-slate-900 text-yellow-300 px-4 py-2 rounded-2xl">
+                    $V_{\text{eff}} = \eta \cdot (W \times L \times H)$
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 text-xs sm:text-sm leading-relaxed">
+                <div class="lg:col-span-5 space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                    <h4 class="font-extrabold text-slate-900 text-sm">1) ภาคทฤษฎีและนิยาม</h4>
+                    <p class="text-slate-600">
+                        <strong>ปริซึมสี่เหลี่ยมมุมฉาก (Rectangular Prism)</strong> คือ รูปทรงสามมิติที่มีฐานทั้งสองเป็นรูปสี่เหลี่ยมมุมฉากที่เท่ากันทุกประการและขนานกัน ปริมาตรเรขาคณิตเต็มคือ $W \times L \times H$ แต่ในทางปฏิบัติต้องคูณด้วย <strong>สัมประสิทธิ์ประสิทธิภาพการบรรจุ ($\eta$)</strong> เพื่อสะท้อนพื้นที่ใช้งานจริง
+                    </p>
+                </div>
+                <div class="lg:col-span-7 space-y-3 bg-green-50/70 p-5 rounded-2xl border border-green-200">
+                    <h4 class="font-extrabold text-green-950 text-sm">2) เหตุผลทางคณิตศาสตร์: ทำไมต้องกำหนดค่า $\eta = 0.80$ (80%)?</h4>
+                    <div class="bg-white p-3.5 rounded-xl border border-green-200 text-slate-700 space-y-1.5">
+                        <p>• หากใช้ $\eta = 1.00$ (100%) จะเป็นการคำนวณแบบกล่องสี่เหลี่ยมสมบูรณ์ทางทฤษฎี ซึ่งเมื่อจัดจริงจะปิดกระเป๋าไม่ได้เพราะติด <strong>แกนคันชักล้อลากและมุมโค้งมน</strong> ประมาณ $12\% - 15\%$ รวมถึงช่องว่างระหว่างรอยต่ออีก $5\% - 8\%$</p>
+                        <p>• จากการทดลองวัดปริมาตรภายในกระเป๋าเดินทางจริง พบว่าพื้นที่ใช้งานได้จริงเฉลี่ยอยู่ที่ <strong>$80\%$ ($\eta = 0.80$)</strong> จึงกำหนดค่านี้เป็นมาตรฐาน</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theory 2 -->
+        <div class="bento-card rounded-3xl p-6 sm:p-8 space-y-5">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="font-mono-code text-xs font-extrabold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full">THEORY 02 • STEP FUNCTION</span>
+                    <h3 class="text-xl font-extrabold text-slate-900 mt-2">ทฤษฎีที่ 2: ฟังก์ชันขั้นบันได (Step Function) สำหรับคำนวณจำนวนชุด</h3>
+                </div>
+                <div class="font-mono-code text-xs sm:text-sm font-extrabold bg-slate-900 text-yellow-300 px-4 py-2 rounded-2xl">
+                    $N(d) = \begin{cases} d & , 1 \le d \le 7 \\ 7 + \lceil 0.5(d - 7) \rceil & , d > 7 \end{cases}$
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 text-xs sm:text-sm leading-relaxed">
+                <div class="lg:col-span-5 space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                    <h4 class="font-extrabold text-slate-900 text-sm">1) ภาคทฤษฎีและสมการย้อนกลับ</h4>
+                    <p class="text-slate-600">
+                        <strong>ฟังก์ชันขั้นบันได (Step Function)</strong> แบ่งเงื่อนไขเป็น 2 ช่วง โดยใช้สัญลักษณ์ปัดเศษขึ้น ($\lceil \dots \rceil$) เพื่อแปลงจำนวนชุดให้เป็นจำนวนเต็มเสมอ
+                    </p>
+                    <div class="bg-white p-3 rounded-xl border border-slate-200 text-slate-700 text-xs">
+                        <strong>สมการย้อนกลับ (Inverse):</strong> หากพกเสื้อรวม $N_{\text{total}} = N(d) + \Delta N$ ชุด จะอยู่ต่อได้สูงสุด $d_{\max} = 7 + 2(N_{\text{total}} - 7)$ วัน (ตัวคูณ $2$ คือส่วนกลับของ $0.5$ นั่นคือ $\frac{1}{0.5} = 2$)
+                    </div>
+                </div>
+                <div class="lg:col-span-7 space-y-3 bg-emerald-50/70 p-5 rounded-2xl border border-emerald-200">
+                    <h4 class="font-extrabold text-emerald-950 text-sm">2) การพิสูจน์ที่มาของค่าสัมประสิทธิ์ $0.5$ (เหตุใดจึงไม่ใช้ $0.1, 0.2, 0.3$ หรือ $0.4$?)</h4>
+                    <div class="bg-white p-3.5 rounded-xl border border-emerald-200 text-slate-700 space-y-2 text-xs">
+                        <p>• <strong>ความหมายเชิงอัตราส่วน:</strong> ค่าสัมประสิทธิ์ $c = \frac{1}{m}$ คืออัตราการเพิ่มเสื้อผ้าต่อ 1 วัน โดย $m$ คือ <strong>รอบวันในการซักผ้า 1 ครั้ง</strong></p>
+                        <p>• <strong>ทำไมต้อง $c = 0.5$ ($\frac{1}{2}$):</strong> หมายถึง <strong>ซักผ้าวนใช้ทุกๆ 2 วัน ($m = 2$)</strong> เช่น เดินทาง 14 วัน คำนวณได้ $N(14) = 7 + \lceil 0.5(14 - 7) \rceil = 11$ ชุด ซึ่งสมดุลและไม่หนักกระเป๋าเกินไป</p>
+                        <p>• <strong>เปรียบเทียบค่าอื่น ($0.1, 0.2, 0.3, 0.4$):</strong> หากใช้ $c = 0.1$ หรือ $0.2$ ต้องรอครบ 5–10 วันจึงเพิ่มเสื้อ 1 ชุด ทำให้เสี่ยงเสื้อผ้าไม่พอใส่หากซักไม่ทัน ส่วน $c = 0.3$ หรือ $0.4$ จะแบ่งรอบวันไม่สม่ำเสมอ (ทุก 2.5 หรือ 3.33 วัน) ปฏิบัติตามได้ยากกว่ารอบ 2 วันซัก 1 ครั้ง</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theory 3 & Tables -->
+        <div class="bento-card rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-4">
+                <div>
+                    <span class="font-mono-code text-xs font-extrabold text-amber-800 bg-yellow-200 px-3 py-1 rounded-full">THEORY 03 • EXPONENTIAL & VALIDATION</span>
+                    <h3 class="text-xl font-extrabold text-slate-900 mt-2">ทฤษฎีที่ 3: เลขยกกำลัง ($2^n$) และตารางผลการทดลองเปรียบเทียบ 5 ชุด</h3>
+                </div>
+                <div class="font-mono-code text-xs sm:text-sm font-extrabold bg-slate-900 text-yellow-300 px-4 py-2 rounded-2xl">
+                    $A_n = \frac{A_0}{2^n}, \quad T_n = t_0 \times 2^n$
+                </div>
+            </div>
+
+            <div class="bg-yellow-50/80 border border-yellow-300 rounded-2xl p-4 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                <strong class="text-amber-950">เหตุผลทางคณิตศาสตร์ของฐาน $2^n$:</strong> ทุกครั้งที่พับครึ่งผ้า 1 ทบ จำนวนชั้นผ้าจะเพิ่มขึ้นเป็น 2 เท่าของเดิมเสมอ จึงเกิดเป็น <strong>ลำดับเรขาคณิตที่มีอัตราส่วนร่วม $r = 2$</strong> ส่งผลให้พื้นที่ฐานลดลงในอัตรา $\frac{1}{2^n}$ สวนทางกับความหนาที่เพิ่มขึ้นในอัตรา $2^n$ ทำให้ปริมาตรรวม $V = A_n \cdot T_n = A_0 \cdot t_0$ คงที่ตามกฎอนุรักษ์ปริมาตร
+            </div>
+
+            <!-- Experimental Validation Table -->
+            <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-900 text-yellow-300 font-bold">
+                        <tr>
+                            <th class="p-3">ชุดที่</th>
+                            <th class="p-3">เงื่อนไขการทดลอง (กระเป๋า 24 นิ้ว)</th>
+                            <th class="p-3">ปริมาตรจากสูตร</th>
+                            <th class="p-3">ปริมาตรวัดจริง</th>
+                            <th class="p-3">ความคลาดเคลื่อน (%Error)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 bg-white">
+                        <tr><td class="p-3 font-bold">01</td><td class="p-3">เขตร้อน (k=1.0), 3 วัน, พับ 3 ทบ</td><td class="p-3 font-mono-code">16,580 ลบ.ซม.</td><td class="p-3 font-mono-code">17,100 ลบ.ซม.</td><td class="p-3 font-mono-code font-bold text-green-700">3.04%</td></tr>
+                        <tr><td class="p-3 font-bold">02</td><td class="p-3">เขตร้อน (k=1.0), 5 วัน, พับ 3 ทบ</td><td class="p-3 font-mono-code">21,116 ลบ.ซม.</td><td class="p-3 font-mono-code">21,950 ลบ.ซม.</td><td class="p-3 font-mono-code font-bold text-green-700">3.80%</td></tr>
+                        <tr><td class="p-3 font-bold">03</td><td class="p-3">เขตอบอุ่น (k=1.4), 7 วัน, พับ 3 ทบ</td><td class="p-3 font-mono-code">31,142 ลบ.ซม.</td><td class="p-3 font-mono-code">32,400 ลบ.ซม.</td><td class="p-3 font-mono-code font-bold text-green-700">3.88%</td></tr>
+                        <tr class="bg-green-50"><td class="p-3 font-bold">04</td><td class="p-3">เขตหนาว (k=2.0), 5 วัน, พับ 3 ทบ</td><td class="p-3 font-mono-code">34,120 ลบ.ซม.</td><td class="p-3 font-mono-code">35,600 ลบ.ซม.</td><td class="p-3 font-mono-code font-bold text-green-700">4.16%</td></tr>
+                        <tr><td class="p-3 font-bold">05</td><td class="p-3">เขตหนาว (k=2.0), 11 วัน, พับ 3 ทบ</td><td class="p-3 font-mono-code">47,728 ลบ.ซม.</td><td class="p-3 font-mono-code">49,850 ลบ.ซม.</td><td class="p-3 font-mono-code font-bold text-amber-700">4.26%</td></tr>
+                    </tbody>
+                    <tfoot class="bg-emerald-950 text-yellow-200 font-bold">
+                        <tr>
+                            <td colspan="4" class="p-3 text-right">ค่าความคลาดเคลื่อนเฉลี่ย (Mean Percentage Error):</td>
+                            <td class="p-3 font-mono-code">3.83% (แม่นยำ > 96%)</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- Rolling vs Folding Comparison -->
+            <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-green-900 text-yellow-200 font-bold">
+                        <tr>
+                            <th class="p-3">ประเด็นเปรียบเทียบ</th>
+                            <th class="p-3">วิธีม้วนผ้า (Rolling • ทรงกระบอก $\pi r^2 h$)</th>
+                            <th class="p-3">วิธีพับผ้า $2^n$ (Folding • ปริซึมมุมฉาก)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 bg-white">
+                        <tr>
+                            <td class="p-3 font-bold">ประสิทธิภาพการบรรจุ (η)</td>
+                            <td class="p-3">เกิดช่องว่างโค้งมนระหว่างวงกลม (สูงสุดทางทฤษฎี $\frac{\pi}{4} \approx 78.5\%$)</td>
+                            <td class="p-3 text-green-800 font-semibold">หน้าตัดสี่เหลี่ยมชิดมุมกระเป๋าแนบสนิท (η ≈ 80%–85%)</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold">การปรับขนาดตามกระเป๋า</td>
+                            <td class="p-3">ความยาวทรงกระบอกคงที่ตามความกว้างเสื้อ ปรับสัดส่วนได้ยาก</td>
+                            <td class="p-3 text-green-800 font-semibold">ปรับจำนวนทบ $n$ ให้เข้ากับกระเป๋า 20", 24", 28" ได้แม่นยำ</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- PAGE 3: PROJECT TEAM & ADVISORS PAGE                                  -->
+    <!-- ===================================================================== -->
+    <section id="page-team" class="hidden flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-36 sm:pt-40 pb-12 space-y-8">
+        <div class="text-center space-y-2 max-w-3xl mx-auto">
+            <span class="inline-block bg-green-100 text-green-800 text-xs font-extrabold px-3.5 py-1 rounded-full border border-yellow-300">
+                โรงเรียนพัทลุง • ระดับชั้นมัธยมศึกษาตอนต้น
+            </span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">คณะผู้จัดทำโครงงานคณิตศาสตร์ SmartPack 3D</h2>
+            <p class="text-xs sm:text-sm text-slate-600">กลุ่มสาระการเรียนรู้คณิตศาสตร์ โรงเรียนพัทลุง จังหวัดพัทลุง</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bento-card rounded-3xl p-6 text-center space-y-3 border-t-4 border-t-green-700">
+                <div class="w-16 h-16 mx-auto rounded-2xl bg-green-100 text-green-800 flex items-center justify-center font-mono-code font-extrabold text-lg border border-green-300">01</div>
+                <div>
+                    <span class="text-[11px] font-bold text-green-700">หัวหน้าคณะผู้จัดทำ</span>
+                    <h3 class="text-lg font-extrabold text-slate-900 mt-0.5">เด็กชายภัทรพล ชูท้วม</h3>
+                    <p class="text-xs text-slate-500 mt-1">นักเรียนระดับชั้นมัธยมศึกษาตอนต้น โรงเรียนพัทลุง</p>
+                </div>
+            </div>
+            <div class="bento-card rounded-3xl p-6 text-center space-y-3 border-t-4 border-t-amber-500">
+                <div class="w-16 h-16 mx-auto rounded-2xl bg-yellow-100 text-amber-900 flex items-center justify-center font-mono-code font-extrabold text-lg border border-yellow-300">02</div>
+                <div>
+                    <span class="text-[11px] font-bold text-amber-800">คณะผู้จัดทำ</span>
+                    <h3 class="text-lg font-extrabold text-slate-900 mt-0.5">เด็กหญิงธัญจิรา วิทยานุภากร</h3>
+                    <p class="text-xs text-slate-500 mt-1">นักเรียนระดับชั้นมัธยมศึกษาตอนต้น โรงเรียนพัทลุง</p>
+                </div>
+            </div>
+            <div class="bento-card rounded-3xl p-6 text-center space-y-3 border-t-4 border-t-emerald-700">
+                <div class="w-16 h-16 mx-auto rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-mono-code font-extrabold text-lg border border-emerald-300">03</div>
+                <div>
+                    <span class="text-[11px] font-bold text-emerald-700">คณะผู้จัดทำ</span>
+                    <h3 class="text-lg font-extrabold text-slate-900 mt-0.5">เด็กหญิงเกวลิน อ่อนไพรี</h3>
+                    <p class="text-xs text-slate-500 mt-1">นักเรียนระดับชั้นมัธยมศึกษาตอนต้น โรงเรียนพัทลุง</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-3 pt-2">
+            <div class="text-center">
+                <span class="inline-block bg-yellow-100 text-amber-900 text-xs font-extrabold px-3.5 py-1 rounded-full border border-yellow-300">
+                    ครูที่ปรึกษาโครงงาน
+                </span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div class="bento-card rounded-3xl p-6 flex items-center gap-4 border-l-4 border-l-green-700">
+                    <div class="w-14 h-14 rounded-2xl bg-green-100 text-green-800 flex items-center justify-center font-mono-code font-extrabold text-base shrink-0 border border-green-300">ADV 01</div>
+                    <div>
+                        <span class="text-[11px] font-bold text-green-700">ครูที่ปรึกษาโครงงาน</span>
+                        <h4 class="text-lg font-extrabold text-slate-900">ครูวิลาสินี สุขทอง</h4>
+                        <p class="text-xs text-slate-500">กลุ่มสาระการเรียนรู้คณิตศาสตร์ โรงเรียนพัทลุง</p>
+                    </div>
+                </div>
+                <div class="bento-card rounded-3xl p-6 flex items-center gap-4 border-l-4 border-l-amber-500">
+                    <div class="w-14 h-14 rounded-2xl bg-yellow-100 text-amber-900 flex items-center justify-center font-mono-code font-extrabold text-base shrink-0 border border-yellow-300">ADV 02</div>
+                    <div>
+                        <span class="text-[11px] font-bold text-amber-800">ครูที่ปรึกษาโครงงาน</span>
+                        <h4 class="text-lg font-extrabold text-slate-900">ครูศิรินทร์นา แสงแพง</h4>
+                        <p class="text-xs text-slate-500">กลุ่มสาระการเรียนรู้คณิตศาสตร์ โรงเรียนพัทลุง</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- PAGE 4: OUR JOURNEY & RESEARCH METHODOLOGY PAGE                       -->
+    <!-- ===================================================================== -->
+    <section id="page-journey" class="hidden flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-36 sm:pt-40 pb-12 space-y-8">
+        <div class="text-center space-y-2 max-w-3xl mx-auto">
+            <span class="inline-block bg-yellow-100 text-amber-900 text-xs font-extrabold px-3.5 py-1 rounded-full border border-yellow-300">
+                ระเบียบวิธีวิจัยและการดำเนินงาน • บทที่ 3
+            </span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">ขั้นตอนการวิจัยและการพัฒนาโครงงาน SmartPack 3D</h2>
+            <p class="text-xs sm:text-sm text-slate-600">ลำดับขั้นตอนการสำรวจข้อมูล การสร้างสมการคณิตศาสตร์ การพัฒนาเว็บแอปพลิเคชัน และการทดลองวัดผลจริง</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bento-card rounded-3xl p-6 space-y-3 border-t-4 border-t-green-700">
+                <div class="flex items-center justify-between">
+                    <span class="font-mono-code text-xs font-extrabold bg-green-100 text-green-800 px-3 py-1 rounded-full">PHASE 01 • DATA COLLECTION</span>
+                    <span class="font-mono-code text-xs font-bold text-slate-400">ระยะที่ 1</span>
+                </div>
+                <h3 class="text-lg font-extrabold text-slate-900">ขั้นสำรวจปัญหาและเก็บข้อมูลเชิงประจักษ์</h3>
+                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    วัดมิติภายในจริงของกระเป๋าเดินทางมาตรฐาน 3 ขนาด (20 นิ้ว, 24 นิ้ว และ 28 นิ้ว) รวมถึงวัดขนาดมาตรฐานของเสื้อผ้า ($w_0 = 60$ ซม., $l_0 = 72$ ซม.) และความหนาเฉลี่ยของเนื้อผ้าใน 3 สภาพภูมิอากาศ เพื่อกำหนดค่าสัมประสิทธิ์ $k \in \{1.0, 1.4, 2.0\}$
+                </p>
+            </div>
+            <div class="bento-card rounded-3xl p-6 space-y-3 border-t-4 border-t-amber-500">
+                <div class="flex items-center justify-between">
+                    <span class="font-mono-code text-xs font-extrabold bg-yellow-100 text-amber-900 px-3 py-1 rounded-full">PHASE 02 • MATH MODELING</span>
+                    <span class="font-mono-code text-xs font-bold text-slate-400">ระยะที่ 2</span>
+                </div>
+                <h3 class="text-lg font-extrabold text-slate-900">ขั้นสร้างแบบจำลองทางคณิตศาสตร์ 3 สมการ</h3>
+                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    สังเคราะห์ความสัมพันธ์เป็นสมการคณิตศาสตร์ระดับ ม.ต้น ได้แก่ (1) ปริมาตรปริซึม $V_{\text{eff}} = \eta(W \times L \times H)$ (2) ฟังก์ชันขั้นบันไดจำนวนชุด $N(d)$ และสมการผกผัน (3) สมการเลขยกกำลังการพับผ้า $2^n$
+                </p>
+            </div>
+            <div class="bento-card rounded-3xl p-6 space-y-3 border-t-4 border-t-emerald-700">
+                <div class="flex items-center justify-between">
+                    <span class="font-mono-code text-xs font-extrabold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full">PHASE 03 • WEB & AI DEVELOPMENT</span>
+                    <span class="font-mono-code text-xs font-bold text-slate-400">ระยะที่ 3</span>
+                </div>
+                <h3 class="text-lg font-extrabold text-slate-900">ขั้นพัฒนาเว็บแอปพลิเคชันและกล้อง AI วัดขนาด</h3>
+                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    พัฒนาเว็บแอปพลิเคชัน <strong>SmartPack 3D</strong> ที่แสดงแอนิเมชันการพับผ้า $2^n$ แบบพลวัต ผัง 2D Bin Packing ระบบกล้อง AI สแกนสิ่งของ และระบบรีโมตแอดมินควบคุมข้ามอุปกรณ์
+                </p>
+            </div>
+            <div class="bento-card rounded-3xl p-6 space-y-3 border-t-4 border-t-slate-800">
+                <div class="flex items-center justify-between">
+                    <span class="font-mono-code text-xs font-extrabold bg-slate-200 text-slate-800 px-3 py-1 rounded-full">PHASE 04 • EXPERIMENT & EVALUATION</span>
+                    <span class="font-mono-code text-xs font-bold text-slate-400">ระยะที่ 4</span>
+                </div>
+                <h3 class="text-lg font-extrabold text-slate-900">ขั้นทดลองจัดกระเป๋าจริงและสรุปผล</h3>
+                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    ดำเนินการทดลองพับผ้าจริง 5 ชุดการทดลอง เปรียบเทียบค่าจากแบบจำลองกับปริมาตรที่วัดได้จริง พบว่ามีค่าความคลาดเคลื่อนเฉลี่ยเพียง <strong>3.83%</strong> และพับ 3 ทบลงตัวที่สุด
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Compact Corner Cookie Banner -->
+    <div id="cookieBanner" class="fixed bottom-4 right-4 z-50 max-w-sm w-[calc(100%-2rem)] bg-white/95 border border-green-300 rounded-3xl p-5 shadow-2xl space-y-3">
+        <div class="space-y-1">
+            <h4 class="font-extrabold text-sm text-slate-900">คุกกี้บนเว็บไซต์นี้</h4>
+            <p class="text-xs text-slate-600 leading-relaxed">
+                เราใช้คุกกี้ที่จำเป็นเพื่อให้เว็บไซต์ทำงานได้อย่างราบรื่นและเพื่อปรับปรุงประสบการณ์การใช้งานของคุณ
+            </p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="closeCookieBanner()" class="px-5 py-2 rounded-full bg-green-700 hover:bg-green-800 text-yellow-200 text-xs font-extrabold shadow transition">
+                ยอมรับ
+            </button>
+            <button onclick="openPrivacyModal()" class="px-4 py-2 rounded-full border border-slate-300 hover:bg-slate-100 text-xs font-bold text-slate-700 transition">
+                เรียนรู้เพิ่มเติม
+            </button>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacyModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 border border-green-200 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b pb-3">
+                <h3 class="font-extrabold text-base text-slate-900">นโยบายการคุ้มครองข้อมูลส่วนบุคคล (PDPA)</h3>
+                <button onclick="closePrivacyModal()" class="text-slate-400 hover:text-slate-700 font-bold text-lg">✕</button>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+                เว็บไซต์โครงงานคณิตศาสตร์ <strong>SmartPack 3D โรงเรียนพัทลุง</strong> ใช้คุกกี้ที่จำเป็นต่อการทำงานของระบบคำนวณบนเบราว์เซอร์เท่านั้น ไม่มีการส่งข้อมูลส่วนตัวหรือรูปภาพของผู้ใช้งานไปยังเซิร์ฟเวอร์ภายนอกเพื่อการค้า
+            </p>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closePrivacyModal(); closeCookieBanner();" class="bg-green-700 text-yellow-200 font-bold text-xs px-4 py-2 rounded-xl">รับทราบและปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-green-200 py-4 px-4 text-center text-xs text-slate-500 mt-auto">
+        โครงงานคณิตศาสตร์ระดับมัธยมศึกษาตอนต้น • โรงเรียนพัทลุง (สีประจำโรงเรียน: เขียว - เหลือง)
+    </footer>
+
+    <script>
+        // ==========================================
+        // 1. GLOBAL STATE & NAVIGATION CONTROLLER
+        // ==========================================
+        let customItems = [
+            { name: 'รองเท้าผ้าใบ', w: 14, l: 28, h: 12 },
+            { name: 'กระเป๋าอุปกรณ์อาบน้ำ', w: 15, l: 22, h: 10 }
+        ];
+        let suitcaseViewMode = 'front';
+        let extraShirtsCount = 0;
+        let foldAnimTimer = null;
+        let currentActivePage = 'page-home';
+
+        function openLeftDrawer() {
+            const drawer = document.getElementById('leftNavDrawer');
+            const backdrop = document.getElementById('leftNavBackdrop');
+            if (backdrop) backdrop.classList.remove('hidden');
+            if (drawer) drawer.classList.remove('-translate-x-full');
+        }
+
+        function closeLeftDrawer() {
+            const drawer = document.getElementById('leftNavDrawer');
+            const backdrop = document.getElementById('leftNavBackdrop');
+            if (drawer) drawer.classList.add('-translate-x-full');
+            if (backdrop) backdrop.classList.add('hidden');
+        }
+
+        function openBackendModal() {
+            const modal = document.getElementById('backendInspectorModal');
+            const jsonBox = document.getElementById('backendLiveJsonBox');
+            if (jsonBox) {
+                const W = document.getElementById('bagW')?.value || 42;
+                const L = document.getElementById('bagL')?.value || 60;
+                const H = document.getElementById('bagH')?.value || 25;
+                const eta = document.getElementById('packingEta')?.value || 0.80;
+                const days = document.getElementById('daysInput')?.value || 5;
+                const foldN = document.getElementById('foldN')?.value || 3;
+                const usage = document.getElementById('kpiUsage')?.textContent || '54.2%';
+                const livePayload = {
+                    spreadsheetId: "1HTCW_lq8qKRe2FJ1YfkeUbnRcGaWuc_xMs_CPCGYWGs",
+                    sheetName: "History_Log",
+                    timestamp: new Date().toISOString(),
+                    parameters: {
+                        bagDimension_cm: `${W}x${L}x${H}`,
+                        packingEfficiency_eta: Number(eta),
+                        travelDays_d: Number(days),
+                        foldingSteps_n: Number(foldN),
+                        extraItemsCount: customItems.length
+                    },
+                    computedResults: {
+                        volumeUsage: usage,
+                        status: document.getElementById('kpiStatus')?.textContent || "ผ่านเงื่อนไข"
+                    }
+                };
+                jsonBox.textContent = JSON.stringify(livePayload, null, 2);
+            }
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeBackendModal() {
+            document.getElementById('backendInspectorModal')?.classList.add('hidden');
+        }
+
+        function switchMainPage(pageId) {
+            currentActivePage = pageId;
+            const pages = ['page-home', 'page-app', 'page-theory', 'page-team', 'page-journey'];
+            pages.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+
+                const drawerBtn = document.getElementById('drawer-' + id);
+                if (drawerBtn) {
+                    const badge = drawerBtn.querySelector('span');
+                    if (id === pageId) {
+                        drawerBtn.className = 'w-full text-left p-3 rounded-2xl bg-green-50 border-l-4 border-l-green-700 transition flex items-start gap-3';
+                        if (badge) badge.className = 'font-mono-code text-xs font-extrabold text-green-800 bg-yellow-300 px-2 py-0.5 rounded-md mt-0.5';
+                    } else {
+                        drawerBtn.className = 'w-full text-left p-3 rounded-2xl hover:bg-slate-100 transition flex items-start gap-3';
+                        if (badge) badge.className = 'font-mono-code text-xs font-extrabold text-slate-600 bg-slate-200 px-2 py-0.5 rounded-md mt-0.5';
+                    }
+                }
+
+                const topNavBtn = document.getElementById('top-nav-' + id);
+                if (topNavBtn) {
+                    if (id === pageId) {
+                        topNavBtn.className = 'px-3 py-1.5 rounded-xl text-xs font-extrabold bg-yellow-400 text-green-950 transition';
+                    } else {
+                        topNavBtn.className = pageId === 'page-home'
+                            ? 'px-3 py-1.5 rounded-xl text-xs font-bold text-white/90 hover:bg-white/15 transition'
+                            : 'px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-green-100 transition';
+                    }
+                }
+            });
+
+            const target = document.getElementById(pageId);
+            if (target) {
+                target.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+                    window.MathJax.typesetPromise([target]).catch(() => {});
+                }
+            }
+
+            const header = document.getElementById('mainHeader');
+            const brandTitle = document.getElementById('brandTitle');
+            const brandSub = document.getElementById('brandSubtitle');
+
+            if (header) {
+                if (pageId === 'page-home') {
+                    header.className = 'fixed top-0 left-0 right-0 z-40 transition-all duration-300 bg-gradient-to-b from-black/85 via-black/60 to-transparent text-white';
+                    if (brandTitle) brandTitle.className = 'font-extrabold text-base sm:text-xl tracking-tight text-white';
+                    if (brandSub) brandSub.className = 'hidden sm:block text-[11px] text-white/85';
+                } else {
+                    header.className = 'fixed top-0 left-0 right-0 z-40 transition-all duration-300 bg-white/95 border-b border-green-200 text-slate-900 shadow-sm';
+                    if (brandTitle) brandTitle.className = 'font-extrabold text-base sm:text-xl tracking-tight text-green-900';
+                    if (brandSub) brandSub.className = 'hidden sm:block text-[11px] text-slate-500';
+                }
+            }
+
+            if (pageId === 'page-app') {
+                calculateAll();
+            }
+        }
+
+        // ==========================================
+        // 2. PRESENTER LIVE REMOTE CONTROL (CROSS-DEVICE SYNC)
+        // ==========================================
+        let remoteRole = 'none';
+        let remoteRoom = 'PT01';
+        let remotePollTimer = null;
+        let lastExecutedTimestamp = 0;
+
+        function openRemoteModal() {
+            document.getElementById('remoteAdminModal')?.classList.remove('hidden');
+        }
+
+        function closeRemoteModal() {
+            document.getElementById('remoteAdminModal')?.classList.add('hidden');
+        }
+
+        function connectAsDisplay() {
+            remoteRoom = (document.getElementById('remoteRoomCodeInput')?.value || 'PT01').trim().toUpperCase();
+            remoteRole = 'display';
+            document.getElementById('remoteControllerPad')?.classList.add('hidden');
+            document.getElementById('remoteSyncStatusText').textContent = `สถานะ: เปิดรับคำสั่งเป็น "จอแสดงผลหลัก" ห้อง [${remoteRoom}]`;
+            document.getElementById('remoteBtnLabel').textContent = `จอหลัก (${remoteRoom})`;
+            startRemotePolling();
+            broadcastDisplayTelemetry();
+        }
+
+        function connectAsController() {
+            remoteRoom = (document.getElementById('remoteRoomCodeInput')?.value || 'PT01').trim().toUpperCase();
+            remoteRole = 'controller';
+            document.getElementById('remoteControllerPad')?.classList.remove('hidden');
+            document.getElementById('remoteSyncStatusText').textContent = `สถานะ: เชื่อมต่อเป็น "รีโมตควบคุม" ห้อง [${remoteRoom}] พร้อมรับภาพสถานะสด`;
+            document.getElementById('remoteBtnLabel').textContent = `รีโมต (${remoteRoom})`;
+            startRemotePolling();
+            sendRemoteAction({ type: 'ping' });
+        }
+
+        function disconnectRemoteSync() {
+            remoteRole = 'none';
+            if (remotePollTimer) clearInterval(remotePollTimer);
+            document.getElementById('remoteControllerPad')?.classList.add('hidden');
+            document.getElementById('remoteSyncStatusText').textContent = 'สถานะ: ตัดการเชื่อมต่อแล้ว';
+            document.getElementById('remoteBtnLabel').textContent = 'รีโมต';
+        }
+
+        async function sendRemoteAction(actionObj) {
+            const payload = { ...actionObj, sender: 'controller', ts: Date.now() };
+            try {
+                localStorage.setItem('smartpack_remote_' + remoteRoom, JSON.stringify(payload));
+            } catch (e) {}
+            try {
+                await fetch(`https://ntfy.sh/smartpack_pt_${remoteRoom}`, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+            } catch (e) {}
+        }
+
+        async function broadcastDisplayTelemetry() {
+            if (remoteRole !== 'display') return;
+            const pageNames = {
+                'page-home': `หน้าแรก (สไลด์ ${currentSlide + 1}/${heroSlides.length})`,
+                'page-app': 'ห้องทดลอง GSP 3D',
+                'page-theory': 'ภาคทฤษฎีและที่มาสูตร',
+                'page-team': 'คณะผู้จัดทำ',
+                'page-journey': 'ขั้นตอนการวิจัย'
+            };
+            const telemetry = {
+                sender: 'display',
+                ts: Date.now(),
+                pageLabel: pageNames[currentActivePage] || currentActivePage,
+                setsText: document.getElementById('kpiStepClothes')?.textContent.trim() + ` (${document.getElementById('daysInput')?.value || 5} วัน)`,
+                foldText: `${document.getElementById('foldN')?.value || 3} ทบ (${document.getElementById('kpiFoldSize')?.textContent.replace('ซม.', '').trim()})`,
+                usageText: document.getElementById('kpiUsage')?.textContent.trim() || '0%'
+            };
+            try {
+                localStorage.setItem('smartpack_telemetry_' + remoteRoom, JSON.stringify(telemetry));
+            } catch (e) {}
+            try {
+                await fetch(`https://ntfy.sh/smartpack_pt_${remoteRoom}`, {
+                    method: 'POST',
+                    body: JSON.stringify(telemetry)
+                });
+            } catch (e) {}
+        }
+
+        function updateControllerMirrorUI(tel) {
+            if (!tel || tel.sender !== 'display') return;
+            const pageBadge = document.getElementById('mirrorActivePageBadge');
+            const setsEl = document.getElementById('mirrorSetsVal');
+            const foldEl = document.getElementById('mirrorFoldVal');
+            const usageEl = document.getElementById('mirrorUsageVal');
+            const timeEl = document.getElementById('mirrorLastSyncTime');
+
+            if (pageBadge) pageBadge.textContent = `จอหลัก: ${tel.pageLabel}`;
+            if (setsEl) setsEl.textContent = tel.setsText;
+            if (foldEl) foldEl.textContent = tel.foldText;
+            if (usageEl) usageEl.textContent = tel.usageText;
+            if (timeEl) {
+                const now = new Date();
+                timeEl.textContent = `อัปเดตสดเมื่อ ${now.toLocaleTimeString('th-TH')}`;
+            }
+        }
+
+        function executeRemoteCommand(cmd) {
+            if (!cmd || !cmd.ts || cmd.ts <= lastExecutedTimestamp) return;
+            if (remoteRole === 'controller' && cmd.sender === 'display') {
+                lastExecutedTimestamp = cmd.ts;
+                updateControllerMirrorUI(cmd);
+                return;
+            }
+            if (remoteRole !== 'display' || cmd.sender === 'display') return;
+
+            lastExecutedTimestamp = cmd.ts;
+            if (cmd.type === 'page' && cmd.pageId) switchMainPage(cmd.pageId);
+            if (cmd.type === 'preset' && cmd.preset) {
+                switchMainPage('page-app');
+                applyQuickScenario(cmd.preset);
+            }
+            if (cmd.type === 'setDays' && typeof cmd.days === 'number') {
+                switchMainPage('page-app');
+                const daysInput = document.getElementById('daysInput');
+                if (daysInput) daysInput.value = cmd.days;
+                calculateAll();
+            }
+            if (cmd.type === 'setFold' && typeof cmd.fold === 'number') {
+                switchMainPage('page-app');
+                const animClass = cmd.fold % 2 === 1 ? 'anim-flip-x' : 'anim-flip-y';
+                setFoldStep(cmd.fold, animClass);
+            }
+            if (cmd.type === 'presentation') togglePresentationMode();
+            if (cmd.type === 'slideNext') nextSlide();
+            if (cmd.type === 'slidePrev') prevSlide();
+            if (cmd.type === 'playFold') {
+                switchMainPage('page-app');
+                playFoldingAnimation();
+            }
+            broadcastDisplayTelemetry();
+        }
+
+        function startRemotePolling() {
+            if (remotePollTimer) clearInterval(remotePollTimer);
+            window.addEventListener('storage', (e) => {
+                if (remoteRole === 'display' && e.key === 'smartpack_remote_' + remoteRoom && e.newValue) {
+                    try { executeRemoteCommand(JSON.parse(e.newValue)); } catch (err) {}
+                }
+                if (remoteRole === 'controller' && e.key === 'smartpack_telemetry_' + remoteRoom && e.newValue) {
+                    try { updateControllerMirrorUI(JSON.parse(e.newValue)); } catch (err) {}
+                }
+            });
+            remotePollTimer = setInterval(async () => {
+                if (remoteRole === 'none') return;
+                try {
+                    const res = await fetch(`https://ntfy.sh/smartpack_pt_${remoteRoom}/json?poll=1&since=10s`);
+                    if (res.ok) {
+                        const txt = await res.text();
+                        const lines = txt.trim().split('\n');
+                        for (const line of lines) {
+                            const parsedLine = JSON.parse(line);
+                            if (parsedLine && parsedLine.message) {
+                                executeRemoteCommand(JSON.parse(parsedLine.message));
+                            }
+                        }
+                    }
+                } catch (e) {}
+            }, 2000);
+        }
+
+        // ==========================================
+        // 3. HERO SLIDESHOW & AUTOPLAY CONTROLS
+        // ==========================================
+        const heroSlides = [
+            {
+                bg: 'https://lh3.googleusercontent.com/gps-cs-s/ANWiy9Rn2ekqrp-Gte5mlAkpsmwmj8koWE53rBo_6b6-vwHjic0qjr_UAVtwCIZ-ZGJ28cPRC8tdWERzfWtlyQk-OvyocEGDgjjPEPBYvvXCt4v7kq-GcfvC88IPGWqLD_Ms00m-r-go=s1360-w1360-h1020-rw',
+                badge: 'โครงงานคณิตศาสตร์ระดับชั้นมัธยมศึกษาตอนต้น • โรงเรียนพัทลุง',
+                title: 'SmartPack <span class="text-yellow-300">3D</span>',
+                desc: 'นวัตกรรมการวางแผนและคำนวณการจัดกระเป๋าเดินทางอัจฉริยะด้วยเรขาคณิต 3 มิติ ฟังก์ชันขั้นบันได และเลขยกกำลังการพับผ้า 2ⁿ',
+                isGuide: false
+            },
+            {
+                bg: 'https://lh3.googleusercontent.com/gps-cs-s/ANWiy9TuvsfegH5FQnxARgoofCTezH43mJn_9ralz8KvqddA4CJ6BJRicd44t9ipnunr3l_swy8KLE5HmnqHq3x94NPyyc_-fjPsrdCFCtWtzW39nJCTco_CWw08JyxLJtxyNSBMM5I=s1360-w1360-h1020-rw',
+                badge: 'คู่มือการใช้งานเว็บไซต์ • 4 ขั้นตอนง่ายๆ (หยุดค้างให้อ่านอัตโนมัติ)',
+                title: 'วิธีการใช้งาน <span class="text-yellow-300">SmartPack 3D</span>',
+                desc: '',
+                isGuide: true
+            },
+            {
+                bg: 'https://lh3.googleusercontent.com/gps-cs-s/ANWiy9Qp2Owy6uEDvbbiNHJVU9HYQXyJyjwOnqBJzSBCrdXyMe28weGAad556rTfQBpF1m8vO0eal_0csniGHHi4TjrcCETm8YF56F96KjvGlPH0cTFuggSzBwV1mArW8zUbu4AfYrdldg=s1360-w1360-h1020-rw',
+                badge: 'ผสานเทคโนโลยี AI Vision & GSP Simulation',
+                title: 'วัดขนาดสิ่งของจริงด้วย <span class="text-yellow-300">กล้อง AI</span>',
+                desc: 'ถ่ายภาพหรือวาดเส้นกรอบสิ่งของบนหน้าจอเพื่อคำนวณปริมาตร W × L × H และจำลองการจัดเรียงแบบ 2D Bin Packing ได้ทันที',
+                isGuide: false
+            },
+            {
+                bg: 'https://lh3.googleusercontent.com/gps-cs-s/ANWiy9SP-Y4H_mU19iF-3v8s2gJ87hL1Y3L8V2cM9j2E3qP8vB7n5R6zK4xQ1wT9pM2cV8hN4jK6lP0sD3fG5hJ7kL9zX2cV4bN6mQ8wE0rT2yU4iO6pA8sD0fG2hJ4kL6zX8cV0bN2m=s1360-w1360-h1020-rw',
+                badge: 'พิสูจน์ผลทางวิทยาศาสตร์ • ความแม่นยำมากกว่า 96%',
+                title: 'ทดลองจริง <span class="text-yellow-300">5 ชุดการทดลอง</span>',
+                desc: 'เปรียบเทียบค่าคำนวณทางคณิตศาสตร์กับการจัดกระเป๋าจริง ค่าความคลาดเคลื่อนเฉลี่ยเพียง 3.83% พร้อมระบบบันทึกสถิติลง Google Sheets',
+                isGuide: false
+            }
+        ];
+        let currentSlide = 0;
+        let heroAutoplayInterval = null;
+        let isHeroPlaying = true;
+
+        function renderHeroSlide() {
+            const slide = heroSlides[currentSlide];
+            const bgEl = document.getElementById('heroBgImage');
+            const centerEl = document.getElementById('heroSlideCenter');
+            const dotsEl = document.getElementById('heroDots');
+            if (!slide || !centerEl) return;
+
+            if (bgEl) bgEl.style.backgroundImage = `url('${slide.bg}')`;
+
+            if (slide.isGuide) {
+                centerEl.innerHTML = `
+                    <span class="inline-block px-4 py-1.5 rounded-full bg-yellow-400 text-green-950 text-xs font-extrabold shadow-lg">${slide.badge}</span>
+                    <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight drop-shadow-lg">${slide.title}</h1>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-left pt-2">
+                        <div class="bg-black/60 border border-white/25 rounded-2xl p-4">
+                            <span class="font-mono-code text-xs font-extrabold text-yellow-300">STEP 01</span>
+                            <h3 class="font-extrabold text-sm text-white mt-1">เลือกขนาดกระเป๋า</h3>
+                            <p class="text-xs text-white/85 mt-1">ระบุขนาด 20", 24", 28" และค่าสัมประสิทธิ์ η (80%)</p>
+                        </div>
+                        <div class="bg-black/60 border border-white/25 rounded-2xl p-4">
+                            <span class="font-mono-code text-xs font-extrabold text-yellow-300">STEP 02</span>
+                            <h3 class="font-extrabold text-sm text-white mt-1">กำหนดวันและภูมิอากาศ</h3>
+                            <p class="text-xs text-white/85 mt-1">คำนวณชุด N(d) และลองเพิ่มเสื้อเผื่อเพื่อดูวันอยู่ต่อ</p>
+                        </div>
+                        <div class="bg-black/60 border border-white/25 rounded-2xl p-4">
+                            <span class="font-mono-code text-xs font-extrabold text-yellow-300">STEP 03</span>
+                            <h3 class="font-extrabold text-sm text-white mt-1">จำลองการพับผ้า 2ⁿ</h3>
+                            <p class="text-xs text-white/85 mt-1">กดเล่นแอนิเมชัน GSP ดูการลดพื้นที่และเพิ่มชั้นผ้า</p>
+                        </div>
+                        <div class="bg-black/60 border border-white/25 rounded-2xl p-4">
+                            <span class="font-mono-code text-xs font-extrabold text-yellow-300">STEP 04</span>
+                            <h3 class="font-extrabold text-sm text-white mt-1">สแกนของด้วยกล้อง AI</h3>
+                            <p class="text-xs text-white/85 mt-1">ใช้กล้องถ่ายหรือวาดเส้นกรอบวัดขนาดสิ่งของลงกระเป๋า</p>
+                        </div>
+                    </div>
+                    <div class="pt-2">
+                        <button onclick="switchMainPage('page-app')" class="px-7 py-3.5 rounded-2xl bg-yellow-400 hover:bg-yellow-300 text-green-950 font-extrabold text-sm shadow-xl transition">
+                            เริ่มเข้าสู่ห้องทดลอง GSP 3D
+                        </button>
+                    </div>
+                `;
+            } else {
+                centerEl.innerHTML = `
+                    <span class="inline-block px-4 py-1.5 rounded-full bg-white/15 border border-yellow-300/60 text-yellow-200 text-xs font-extrabold">${slide.badge}</span>
+                    <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight drop-shadow-lg">${slide.title}</h1>
+                    <p class="text-sm sm:text-lg text-white/90 max-w-2xl mx-auto leading-relaxed">${slide.desc}</p>
+                    <div class="pt-3 flex flex-wrap items-center justify-center gap-3">
+                        <button onclick="switchMainPage('page-app')" class="px-7 py-3.5 rounded-2xl bg-yellow-400 hover:bg-yellow-300 text-green-950 font-extrabold text-sm shadow-xl transition">
+                            เปิดห้องทดลอง GSP 3D
+                        </button>
+                        <button onclick="switchMainPage('page-theory')" class="px-6 py-3.5 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/35 text-white font-bold text-sm transition">
+                            อ่านภาคทฤษฎี 3 สูตร
+                        </button>
+                    </div>
+                `;
+            }
+
+            if (dotsEl) {
+                dotsEl.innerHTML = heroSlides.map((_, idx) => `
+                    <button onclick="goToSlide(${idx})" class="h-2.5 rounded-full transition-all ${idx === currentSlide ? 'w-8 bg-yellow-400' : 'w-2.5 bg-white/40 hover:bg-white/70'}"></button>
+                `).join('');
+            }
+        }
+
+        function startHeroAutoplay() {
+            stopHeroAutoplay();
+            isHeroPlaying = true;
+            updatePlayBtnUI();
+            heroAutoplayInterval = setInterval(() => {
+                currentSlide = (currentSlide + 1) % heroSlides.length;
+                renderHeroSlide();
+                if (heroSlides[currentSlide].isGuide) {
+                    stopHeroAutoplay();
+                }
+            }, 4500);
+        }
+
+        function stopHeroAutoplay() {
+            if (heroAutoplayInterval) {
+                clearInterval(heroAutoplayInterval);
+                heroAutoplayInterval = null;
+            }
+            isHeroPlaying = false;
+            updatePlayBtnUI();
+        }
+
+        function toggleHeroAutoplay() {
+            if (isHeroPlaying) stopHeroAutoplay();
+            else startHeroAutoplay();
+        }
+
+        function updatePlayBtnUI() {
+            const icon = document.getElementById('slidePlayIcon');
+            const text = document.getElementById('slidePlayText');
+            if (icon) icon.textContent = isHeroPlaying ? '❚❚' : '▶';
+            if (text) text.textContent = isHeroPlaying ? 'หยุดสไลด์ชั่วคราว' : 'เล่นสไลด์อัตโนมัติ';
+        }
+
+        function nextSlide() {
+            stopHeroAutoplay();
+            currentSlide = (currentSlide + 1) % heroSlides.length;
+            renderHeroSlide();
+        }
+
+        function prevSlide() {
+            stopHeroAutoplay();
+            currentSlide = (currentSlide - 1 + heroSlides.length) % heroSlides.length;
+            renderHeroSlide();
+        }
+
+        function goToSlide(idx) {
+            stopHeroAutoplay();
+            currentSlide = idx;
+            renderHeroSlide();
+        }
+
+        // ==========================================
+        // 4. CORE MATHEMATICAL ENGINE (3 FORMULAS)
+        // ==========================================
+        function applyQuickScenario(type) {
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.className = 'preset-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-green-100 text-slate-800 border border-slate-200 transition';
+            });
+            const activeBtn = document.getElementById('preset-' + type);
+            if (activeBtn) {
+                activeBtn.className = 'preset-btn px-3 py-1.5 rounded-xl text-xs font-extrabold bg-green-700 text-yellow-200 border border-green-800 shadow-sm transition';
+            }
+
+            extraShirtsCount = 0;
+            const extraLabel = document.getElementById('extraShirtsVal');
+            if (extraLabel) extraLabel.textContent = '+0';
+
+            if (type === 'thai3') {
+                document.getElementById('bagW').value = 36;
+                document.getElementById('bagL').value = 55;
+                document.getElementById('bagH').value = 23;
+                document.getElementById('packingEta').value = 0.80;
+                document.getElementById('countrySelect').value = '1.0|0';
+                document.getElementById('daysInput').value = 3;
+                setFoldStep(3, 'anim-flip-x');
+            } else if (type === 'japan11') {
+                document.getElementById('bagW').value = 42;
+                document.getElementById('bagL').value = 60;
+                document.getElementById('bagH').value = 25;
+                document.getElementById('packingEta').value = 0.80;
+                document.getElementById('countrySelect').value = '2.0|2';
+                document.getElementById('daysInput').value = 11;
+                setFoldStep(3, 'anim-flip-x');
+            } else if (type === 'overfold4') {
+                document.getElementById('bagW').value = 42;
+                document.getElementById('bagL').value = 60;
+                document.getElementById('bagH').value = 25;
+                document.getElementById('packingEta').value = 0.80;
+                document.getElementById('countrySelect').value = '2.0|2';
+                document.getElementById('daysInput').value = 7;
+                setFoldStep(4, 'anim-flip-y');
+            }
+        }
+
+        function togglePresentationMode() {
+            const isActive = document.body.classList.toggle('presentation-mode');
+            const btnText = document.getElementById('presentationModeText');
+            const btn = document.getElementById('presentationModeBtn');
+            if (btnText) btnText.textContent = isActive ? 'ออกจากโหมดนำเสนอ' : 'โหมดขยายเต็มจอนำเสนอ';
+            if (btn) {
+                btn.className = isActive
+                    ? 'px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-amber-500 hover:bg-amber-600 text-green-950 shadow-sm transition shrink-0'
+                    : 'px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-slate-900 hover:bg-green-800 text-yellow-300 shadow-sm transition shrink-0';
+            }
+        }
+
+        function setBagPreset(w, l, h) {
+            document.getElementById('bagW').value = w;
+            document.getElementById('bagL').value = l;
+            document.getElementById('bagH').value = h;
+            calculateAll();
+        }
+
+        function setSuitcaseView(mode) {
+            suitcaseViewMode = mode;
+            const btns = {
+                front: document.getElementById('viewFrontBtn'),
+                binpack: document.getElementById('viewBinpackBtn'),
+                depth: document.getElementById('viewDepthBtn')
+            };
+            Object.keys(btns).forEach(k => {
+                if (!btns[k]) return;
+                btns[k].className = k === mode
+                    ? 'px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-green-700 text-yellow-200 transition'
+                    : 'px-2.5 py-1 rounded-lg text-[10px] font-extrabold text-slate-600 hover:text-slate-900 transition';
+            });
+            calculateAll();
+        }
+
+        function changeExtraShirts(delta) {
+            extraShirtsCount = Math.max(0, Math.min(10, extraShirtsCount + delta));
+            const label = document.getElementById('extraShirtsVal');
+            if (label) label.textContent = `+${extraShirtsCount}`;
+            calculateAll();
+        }
+
+        function setFoldStep(step, animClass = '') {
+            const slider = document.getElementById('foldN');
+            if (slider) slider.value = step;
+            document.querySelectorAll('.fold-step-btn').forEach((btn, idx) => {
+                btn.className = idx === Number(step)
+                    ? 'fold-step-btn text-[10px] font-mono-code font-bold py-1 rounded-lg bg-amber-500 text-white'
+                    : 'fold-step-btn text-[10px] font-mono-code font-bold py-1 rounded-lg bg-white border border-amber-300 hover:bg-amber-100';
+            });
+            calculateAll(animClass);
+        }
+
+        function triggerManualFoldChange(val) {
+            const n = Number(val);
+            const animClass = n % 2 === 1 ? 'anim-flip-x' : 'anim-flip-y';
+            setFoldStep(n, animClass);
+        }
+
+        function playFoldingAnimation() {
+            if (foldAnimTimer) clearInterval(foldAnimTimer);
+            let step = 0;
+            setFoldStep(0, '');
+            foldAnimTimer = setInterval(() => {
+                step++;
+                if (step > 4) {
+                    clearInterval(foldAnimTimer);
+                    foldAnimTimer = null;
+                    return;
+                }
+                const animClass = step % 2 === 1 ? 'anim-flip-x' : 'anim-flip-y';
+                setFoldStep(step, animClass);
+            }, 850);
+        }
+
+        function autoOptimizeFold() {
+            const W = parseFloat(document.getElementById('bagW').value) || 42;
+            const L = parseFloat(document.getElementById('bagL').value) || 60;
+            const origW = parseFloat(document.getElementById('shirtW').value) || 60;
+            const origL = parseFloat(document.getElementById('shirtL').value) || 72;
+
+            let bestN = 3;
+            for (let n = 1; n <= 4; n++) {
+                const divX = Math.pow(2, Math.ceil(n / 2));
+                const divY = Math.pow(2, Math.floor(n / 2));
+                const fw = origW / divX;
+                const fl = origL / divY;
+                if (fw <= W && fl <= L) {
+                    bestN = n;
+                    if (fw <= W / 2) break;
+                }
+            }
+            setFoldStep(bestN, 'anim-flip-x');
+        }
+
+        function addCustomItem() {
+            const name = document.getElementById('customName').value.trim() || 'สิ่งของเพิ่มเติม';
+            const w = Math.max(1, parseFloat(document.getElementById('customW').value) || 10);
+            const l = Math.max(1, parseFloat(document.getElementById('customL').value) || 15);
+            const h = Math.max(1, parseFloat(document.getElementById('customH').value) || 8);
+            customItems.push({ name, w, l, h });
+            document.getElementById('customName').value = '';
+            calculateAll();
+        }
+
+        function removeCustomItem(idx) {
+            customItems.splice(idx, 1);
+            calculateAll();
+        }
+
+        function renderCustomItemsTags() {
+            const container = document.getElementById('customItemsList');
+            if (!container) return;
+            container.innerHTML = customItems.map((it, idx) => `
+                <span class="inline-flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2 py-0.5 text-[10px] font-bold text-slate-700">
+                    <span>${it.name} (${it.w}×${it.l}×${it.h})</span>
+                    <button onclick="removeCustomItem(${idx})" class="text-red-600 hover:text-red-800 font-extrabold ml-0.5">×</button>
+                </span>
+            `).join('');
+        }
+
+        function calculateAll(flipAnimClass = '') {
+            const W = Math.max(15, parseFloat(document.getElementById('bagW')?.value) || 42);
+            const L = Math.max(20, parseFloat(document.getElementById('bagL')?.value) || 60);
+            const H = Math.max(10, parseFloat(document.getElementById('bagH')?.value) || 25);
+            const eta = parseFloat(document.getElementById('packingEta')?.value) || 0.80;
+
+            const rawBagVol = W * L * H;
+            const effBagVol = Math.round(rawBagVol * eta);
+
+            const etaLabel = document.getElementById('etaValLabel');
+            if (etaLabel) etaLabel.textContent = `η = ${eta.toFixed(2)} (${Math.round(eta * 100)}%)`;
+
+            const kRaw = (document.getElementById('countrySelect')?.value || '2.0|2').split('|');
+            const k = parseFloat(kRaw[0]) || 1.0;
+            const coats = parseInt(kRaw[1]) || 0;
+
+            const days = parseInt(document.getElementById('daysInput')?.value) || 5;
+            const daysVal = document.getElementById('daysVal');
+            if (daysVal) daysVal.textContent = `${days} วัน`;
+
+            const baseSets = days <= 7 ? days : 7 + Math.ceil(0.5 * (days - 7));
+            const totalSets = baseSets + extraShirtsCount;
+
+            const maxDaysPossible = totalSets <= 7 ? totalSets : 7 + 2 * (totalSets - 7);
+            const extraDaysGain = Math.max(0, maxDaysPossible - days);
+            const extraBox = document.getElementById('extraDaysResultBox');
+            if (extraBox) {
+                extraBox.innerHTML = `หากพกเสื้อเพิ่ม <strong>${extraShirtsCount} ชุด</strong> (รวม ${totalSets} ชุด) จะอยู่ต่อได้เพิ่ม <strong>+${extraDaysGain} วัน</strong> (รวมสูงสุด ${maxDaysPossible} วัน)`;
+            }
+
+            const origW = Math.max(20, parseFloat(document.getElementById('shirtW')?.value) || 60);
+            const origL = Math.max(20, parseFloat(document.getElementById('shirtL')?.value) || 72);
+            const n = parseInt(document.getElementById('foldN')?.value) || 0;
+            const layers = Math.pow(2, n);
+
+            const divX = Math.pow(2, Math.ceil(n / 2));
+            const divY = Math.pow(2, Math.floor(n / 2));
+            const foldedW = origW / divX;
+            const foldedL = origL / divY;
+            const baseThick = 0.35 * k;
+            const foldedThick = baseThick * layers;
+
+            const foldBadge = document.getElementById('foldBadge');
+            const foldStepsText = document.getElementById('foldStepsText');
+            if (foldBadge) foldBadge.textContent = `n = ${n} (2^${n})`;
+            if (foldStepsText) foldStepsText.textContent = `${n} ทบ (2^${n} = ${layers} ชั้น)`;
+
+            const singleClothVol = foldedW * foldedL * foldedThick;
+            const totalClothesVol = singleClothVol * totalSets;
+            const coatsVol = coats * 3400;
+            const customVol = customItems.reduce((sum, it) => sum + (it.w * it.l * it.h), 0);
+            const totalUsedVol = totalClothesVol + coatsVol + customVol;
+            const usagePct = (totalUsedVol / effBagVol) * 100;
+
+            document.getElementById('kpiBagVol').innerHTML = `${effBagVol.toLocaleString()} <span class="text-xs font-normal text-slate-400">ลบ.ซม.</span>`;
+            document.getElementById('kpiBagDim').textContent = `เต็ม ${rawBagVol.toLocaleString()} ลบ.ซม. (η = ${eta.toFixed(2)})`;
+            document.getElementById('kpiStepClothes').innerHTML = `${totalSets} <span class="text-xs font-normal text-slate-500">ชุด</span>`;
+            document.getElementById('kpiStepNote').textContent = days <= 7
+                ? `เดินทาง ${days} วัน (จัดตามจำนวนวันจริง)`
+                : `เดินทาง ${days} วัน (ช่วงซักผ้าระหว่างทริป)`;
+            document.getElementById('kpiFoldSize').innerHTML = `${foldedW.toFixed(1)} × ${foldedL.toFixed(1)} <span class="text-xs font-normal text-slate-500">ซม.</span>`;
+            document.getElementById('kpiFoldThick').textContent = `พับ ${n} ทบ (2^${n} = ${layers} ชั้น) • หนา ${foldedThick.toFixed(1)} ซม.`;
+
+            const usageEl = document.getElementById('kpiUsage');
+            const statusEl = document.getElementById('kpiStatus');
+            const barEl = document.getElementById('kpiProgressBar');
+            const alertEl = document.getElementById('alertBanner');
+            const fitBadge = document.getElementById('suitcaseFitBadge');
+
+            const cols = Math.max(1, Math.floor(W / Math.max(1, foldedW)));
+            const rows = Math.max(1, Math.floor(L / Math.max(1, foldedL)));
+            const layersStacked = Math.ceil(totalSets / (cols * rows));
+            const totalStackHeight = layersStacked * foldedThick;
+
+            const isDimOver = foldedW > W || foldedL > L || totalStackHeight > H;
+            const isVolOver = usagePct > 100;
+
+            if (usageEl) usageEl.textContent = `${usagePct.toFixed(1)}%`;
+            if (barEl) barEl.style.width = `${Math.min(100, usagePct)}%`;
+
+            if (isVolOver || isDimOver) {
+                if (statusEl) {
+                    statusEl.textContent = 'เกินความจุกระเป๋า';
+                    statusEl.className = 'text-[11px] text-red-700 bg-red-100 px-2.5 py-0.5 rounded-full font-bold';
+                }
+                if (fitBadge) {
+                    fitBadge.textContent = 'เกินขอบเขตกระเป๋า';
+                    fitBadge.className = 'text-[11px] font-bold text-red-600';
+                }
+                if (alertEl) {
+                    alertEl.classList.remove('hidden');
+                    alertEl.textContent = isDimOver
+                        ? `คำเตือนเชิงเรขาคณิต: ขนาดเสื้อหลังพับ (${foldedW.toFixed(1)}×${foldedL.toFixed(1)} ซม.) หรือความสูงกองผ้า (${totalStackHeight.toFixed(1)} ซม.) เกินขนาดภายในกระเป๋า (${W}×${L}×${H} ซม.) แนะนำให้ปรับจำนวนทบ n`
+                        : `คำเตือนปริมาตร: ปริมาตรสิ่งของรวม (${Math.round(totalUsedVol).toLocaleString()} ลบ.ซม.) เกินความจุใช้งานจริง (${effBagVol.toLocaleString()} ลบ.ซม.)`;
+                }
+            } else {
+                if (statusEl) {
+                    statusEl.textContent = 'ผ่านเงื่อนไข';
+                    statusEl.className = 'text-[11px] text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full font-bold';
+                }
+                if (fitBadge) {
+                    fitBadge.textContent = 'สภาวะสมดุล 100%';
+                    fitBadge.className = 'text-[11px] font-bold text-emerald-700';
+                }
+                if (alertEl) alertEl.classList.add('hidden');
+            }
+
+            const dimLabel = document.getElementById('gspBagDimLabel');
+            if (dimLabel) dimLabel.textContent = `${W} × ${L} × ${H} cm`;
+
+            renderCustomItemsTags();
+            renderAnimatedClothFolding(origW, origL, foldedW, foldedL, n, layers, foldedThick, flipAnimClass);
+            renderSuitcase3D(W, L, H, effBagVol, totalClothesVol, totalSets, coats, foldedW, foldedL, n, foldedThick);
+            renderRealtimeMathGraphs(days, totalSets, origW * origL, baseThick, n);
+        }
+
+        function closeCookieBanner() { document.getElementById('cookieBanner')?.classList.add('hidden'); }
+        function openPrivacyModal() { document.getElementById('privacyModal')?.classList.remove('hidden'); }
+        function closePrivacyModal() { document.getElementById('privacyModal')?.classList.add('hidden'); }
+
+        // ==========================================
+        // 5. GSP SKETCHPAD 01 & 02 RENDERERS
+        // ==========================================
+        function renderAnimatedClothFolding(origW, origL, foldedW, foldedL, n, layers, thick, flipAnimClass = '', customNarration = '') {
+            const stage = document.getElementById('clothFoldingStage');
+            const indicator = document.getElementById('foldStepIndicator');
+            const narrationPill = document.getElementById('foldNarrationPill');
+            const footer = document.getElementById('foldMetricsFooter');
+            if (!stage) return;
+
+            const stepTitles = [
+                '0: กางเสื้อเต็มผืน (ยังไม่พับ)',
+                '1: พับเก็บแขนซ้าย-ขวา (ครึ่งแนวตั้ง)',
+                '2: พับครึ่งชายเสื้อขึ้น (ครึ่งแนวนอน)',
+                '3: พับทบด้านข้างเข้าหากัน (ขนาดมาตรฐาน)',
+                '4: พับทบสั้นลงอีกครั้ง (ก้อนเล็กหนา)'
+            ];
+
+            if (indicator) indicator.textContent = `n = ${n} (2^${n} = ${layers} ชั้น)`;
+            if (narrationPill) narrationPill.textContent = customNarration || stepTitles[n];
+
+            const refW = 140;
+            const refH = 160;
+            const ratioW = Math.max(0.25, foldedW / origW);
+            const ratioH = Math.max(0.25, foldedL / origL);
+            const curW = Math.round(refW * ratioW);
+            const curH = Math.round(refH * ratioH);
+
+            let layerBarsHtml = '';
+            for (let i = 0; i < layers; i++) {
+                layerBarsHtml += `<div class="w-full h-1.5 rounded-sm bg-emerald-600 border border-yellow-200"></div>`;
+            }
+
+            const nextIsVertical = (n + 1) % 2 === 1;
+            const gspAxisLine = n < 4 ? (
+                nextIsVertical
+                    ? `<line x1="50" y1="0" x2="50" y2="100" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 3" />
+                       <circle cx="50" cy="50" r="3" fill="#f59e0b" />`
+                    : `<line x1="0" y1="50" x2="100" y2="50" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 3" />
+                       <circle cx="50" cy="50" r="3" fill="#f59e0b" />`
+            ) : '';
+
+            const gspAxisBadge = n < 4 ? (
+                nextIsVertical
+                    ? `<span class="absolute -bottom-5 bg-amber-400 text-green-950 text-[9px] font-extrabold px-1.5 py-0.5 rounded shadow whitespace-nowrap">แกนสะท้อนแนวตั้ง (Y)</span>`
+                    : `<span class="absolute -bottom-5 bg-amber-400 text-green-950 text-[9px] font-extrabold px-1.5 py-0.5 rounded shadow whitespace-nowrap">แกนสะท้อนแนวนอน (X)</span>`
+            ) : `<span class="absolute -bottom-5 bg-green-800 text-yellow-200 text-[9px] font-extrabold px-1.5 py-0.5 rounded shadow whitespace-nowrap">พับครบ 4 ทบสูงสุด</span>`;
+
+            stage.innerHTML = `
+                <div class="w-full text-center bg-emerald-50 border border-emerald-200 rounded-xl py-1.5 px-2 mb-2">
+                    <span class="text-xs font-extrabold text-emerald-900">ขั้นที่ ${stepTitles[n]}</span>
+                </div>
+                <div class="w-full grid grid-cols-12 gap-2 items-center my-1">
+                    <div class="col-span-8 flex flex-col items-center justify-center">
+                        <div class="relative rounded-2xl border border-slate-300 bg-white/80 flex items-center justify-center"
+                             style="width: ${refW}px; height: ${refH}px;">
+                            <span class="absolute top-1 left-2 text-[9px] font-mono-code text-slate-400">เดิม ${origW}×${origL}</span>
+                            <svg viewBox="0 0 100 100" class="w-28 h-28 text-slate-200 fill-current pointer-events-none">
+                                <path d="M25 15 L40 15 Q50 25 60 15 L75 15 L95 35 L82 48 L72 38 L72 88 L28 88 L28 38 L18 48 L5 35 Z"/>
+                            </svg>
+                            <div class="cloth-3d-body ${flipAnimClass} absolute flex items-center justify-center"
+                                 style="width: ${curW}px; height: ${curH}px;">
+                                <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="w-full h-full overflow-visible">
+                                    <rect x="0" y="0" width="100" height="100" fill="rgba(16, 185, 129, 0.28)" stroke="#15803d" stroke-width="2.5" />
+                                    <line x1="0" y1="0" x2="100" y2="100" stroke="rgba(21, 128, 61, 0.35)" stroke-width="1" stroke-dasharray="3 3" />
+                                    ${gspAxisLine}
+                                    <circle cx="0" cy="0" r="4" fill="#dc2626" stroke="#ffffff" stroke-width="1" />
+                                    <circle cx="100" cy="0" r="4" fill="#dc2626" stroke="#ffffff" stroke-width="1" />
+                                    <circle cx="100" cy="100" r="4" fill="#dc2626" stroke="#ffffff" stroke-width="1" />
+                                    <circle cx="0" cy="100" r="4" fill="#dc2626" stroke="#ffffff" stroke-width="1" />
+                                </svg>
+                                <span class="absolute -top-3.5 -left-2.5 font-mono-code text-[9px] font-extrabold text-red-700">A</span>
+                                <span class="absolute -top-3.5 -right-2.5 font-mono-code text-[9px] font-extrabold text-red-700">B</span>
+                                <span class="absolute -bottom-3.5 -right-2.5 font-mono-code text-[9px] font-extrabold text-red-700">C</span>
+                                <span class="absolute -bottom-3.5 -left-2.5 font-mono-code text-[9px] font-extrabold text-red-700">D</span>
+                                <div class="absolute bg-green-900/90 text-yellow-200 px-1.5 py-0.5 rounded font-mono-code text-[10px] font-extrabold shadow">
+                                    ${foldedW.toFixed(0)}×${foldedL.toFixed(0)}
+                                </div>
+                                ${gspAxisBadge}
+                            </div>
+                        </div>
+                        <span class="text-[10px] text-slate-500 mt-4">รูปสี่เหลี่ยม GSP ABCD (จุดยอดสีแดง)</span>
+                    </div>
+                    <div class="col-span-4 flex flex-col items-center justify-end h-full bg-white/90 rounded-2xl border border-slate-200 p-2">
+                        <span class="text-[10px] font-extrabold text-amber-800 mb-1">ความหนาชั้นผ้า</span>
+                        <div class="w-12 flex-1 flex flex-col justify-end gap-0.5 py-1">
+                            ${layerBarsHtml}
+                        </div>
+                        <div class="text-center border-t border-slate-200 pt-1 w-full">
+                            <div class="font-mono-code text-xs font-extrabold text-green-800">${layers} ชั้น</div>
+                            <div class="font-mono-code text-[10px] text-amber-700 font-bold">${thick.toFixed(1)} ซม.</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            if (footer) {
+                const area = foldedW * foldedL;
+                const pctOfOrig = Math.round((area / (origW * origL)) * 100);
+                footer.innerHTML = `
+                    <div class="flex justify-between">
+                        <span class="text-slate-600 font-semibold">พื้นที่ฐานเหลือ (A_${n}):</span>
+                        <span class="font-mono-code font-extrabold text-green-800">${area.toLocaleString()} ตร.ซม. (${pctOfOrig}% ของเดิม)</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-600 font-semibold">ความหนากองผ้า (T_${n}):</span>
+                        <span class="font-mono-code font-extrabold text-amber-700">${thick.toFixed(2)} ซม. (ซ้อน ${layers} ชั้น)</span>
+                    </div>
+                `;
+            }
+        }
+
+        function renderSuitcase3D(W, L, H, bagVol, totalClothesVol, effectiveSets, coats, foldedW, foldedL, n, singleFoldedThick) {
+            const container = document.getElementById('realisticSuitcaseInterior');
+            const summary = document.getElementById('suitcaseFooterSummary');
+            if (!container) return;
+
+            const cols = Math.max(1, Math.floor(W / Math.max(1, foldedW)));
+            const rows = Math.max(1, Math.floor(L / Math.max(1, foldedL)));
+            const perLayerCapacity = cols * rows;
+            const layersStacked = Math.ceil(effectiveSets / perLayerCapacity);
+            const totalStackHeight = layersStacked * singleFoldedThick;
+
+            if (suitcaseViewMode === 'front') {
+                const previewCount = Math.min(effectiveSets, Math.max(2, perLayerCapacity * 2));
+                let blocksHtml = '';
+                for (let i = 0; i < previewCount; i++) {
+                    blocksHtml += `
+                        <div class="rounded-lg bg-gradient-to-br from-emerald-500 to-green-700 border border-green-950 text-white p-1.5 flex flex-col items-center justify-center text-center shadow-sm">
+                            <span class="font-mono-code text-[10px] font-extrabold text-yellow-200">ชุด #${i + 1}</span>
+                            <span class="text-[9px] text-white/90">${foldedW.toFixed(0)}×${foldedL.toFixed(0)}</span>
+                        </div>
+                    `;
+                }
+
+                const extraItemsHtml = customItems.map(it => `
+                    <div class="rounded-lg bg-amber-100 border border-amber-400 text-amber-950 px-2 py-1 text-[10px] font-bold flex items-center justify-between">
+                        <span class="truncate">${it.name}</span>
+                        <span class="font-mono-code text-[9px] ml-1">${it.w}×${it.l}</span>
+                    </div>
+                `).join('');
+
+                container.innerHTML = `
+                    <div class="grid gap-1.5 flex-1" style="grid-template-columns: repeat(${Math.min(4, cols)}, minmax(0, 1fr));">
+                        ${blocksHtml}
+                    </div>
+                    ${coats > 0 ? `<div class="rounded-lg bg-sky-100 border border-sky-300 text-sky-900 px-2.5 py-1 text-[10px] font-extrabold text-center">+ เสื้อโค้ทกันหนาว ${coats} ตัว (${(coats * 3400).toLocaleString()} ลบ.ซม.)</div>` : ''}
+                    ${extraItemsHtml ? `<div class="grid grid-cols-2 gap-1 pt-1 border-t border-slate-200">${extraItemsHtml}</div>` : ''}
+                `;
+            } else if (suitcaseViewMode === 'binpack') {
+                const maxVisW = 240;
+                const scale = maxVisW / Math.max(W, L);
+                const boxW = Math.round(W * scale);
+                const boxL = Math.round(L * scale);
+                const itemW = Math.max(18, Math.floor(foldedW * scale));
+                const itemL = Math.max(18, Math.floor(foldedL * scale));
+                const usedAreaPct = Math.min(100, Math.round(((cols * foldedW * rows * foldedL) / (W * L)) * 100));
+
+                let slotsHtml = '';
+                const maxSlots = Math.min(effectiveSets, cols * rows);
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        const idx = r * cols + c;
+                        if (idx < maxSlots) {
+                            slotsHtml += `
+                                <div class="absolute rounded border border-green-950 bg-emerald-600/90 text-white flex flex-col items-center justify-center text-[8px] font-mono-code font-bold"
+                                     style="left: ${c * itemW + 2}px; top: ${r * itemL + 2}px; width: ${itemW - 3}px; height: ${itemL - 3}px;">
+                                    <span>#${idx + 1}</span>
+                                </div>
+                            `;
+                        }
+                    }
+                }
+
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center flex-1 py-1">
+                        <div class="text-[10px] font-mono-code font-bold text-slate-600 mb-1">
+                            2D Top-Down Bin Packing • ใช้พื้นที่หน้าตัด ${usedAreaPct}% (${cols}×${rows} ช่อง/ชั้น)
+                        </div>
+                        <div class="relative bg-slate-100 border-2 border-dashed border-green-800 rounded-lg overflow-hidden"
+                             style="width: ${boxW}px; height: ${boxL}px;">
+                            ${slotsHtml}
+                        </div>
+                        <div class="text-[9px] font-mono-code text-slate-500 mt-1">
+                            พื้นที่ว่างด้านข้าง: ${(W - cols * foldedW).toFixed(1)} ซม. • ด้านล่าง: ${(L - rows * foldedL).toFixed(1)} ซม.
+                        </div>
+                    </div>
+                `;
+            } else {
+                const heightPct = Math.min(100, Math.round((totalStackHeight / H) * 100));
+                const isOverHeight = totalStackHeight > H;
+                container.innerHTML = `
+                    <div class="flex-1 flex flex-col justify-end relative border-b-2 border-slate-800 pb-1">
+                        <div class="flex justify-between text-[10px] font-mono-code text-slate-500 mb-1">
+                            <span>เพดานกระเป๋า H = ${H} ซม.</span>
+                            <span class="${isOverHeight ? 'text-red-600 font-bold' : 'text-green-700 font-bold'}">ซ้อน ${layersStacked} ชั้น (${totalStackHeight.toFixed(1)} ซม.)</span>
+                        </div>
+                        <div class="w-full h-36 bg-slate-100 rounded-xl border border-dashed border-slate-400 flex flex-col justify-end overflow-hidden p-1.5">
+                            <div class="w-full rounded-lg transition-all duration-300 flex items-center justify-center text-white font-mono-code text-xs font-extrabold ${isOverHeight ? 'bg-red-600' : 'bg-gradient-to-t from-green-800 to-emerald-500'}"
+                                 style="height: ${heightPct}%;">
+                                ${totalStackHeight.toFixed(1)} / ${H} ซม. (${heightPct}%)
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (summary) {
+                summary.innerHTML = `
+                    <div class="flex justify-between">
+                        <span class="text-slate-700 font-semibold">การจัดเรียงระนาบ XY:</span>
+                        <span class="font-mono-code font-extrabold text-green-900">${cols} แถว × ${rows} ตอน (ซ้อน ${layersStacked} ชั้น)</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-700 font-semibold">ความสูงกองผ้าแนวแกน Z:</span>
+                        <span class="font-mono-code font-extrabold ${totalStackHeight > H ? 'text-red-600' : 'text-emerald-700'}">${totalStackHeight.toFixed(1)} ซม. / ลึก ${H} ซม.</span>
+                    </div>
+                `;
+            }
+        }
+
+        function renderRealtimeMathGraphs(currentDays, currentSets, origArea, baseThick, currentN) {
+            const stepSvg = document.getElementById('stepFunctionSvg');
+            const stepCoord = document.getElementById('graphStepCoord');
+            if (stepSvg) {
+                const padL = 32, padB = 24, padT = 16, padR = 16;
+                const plotW = 320 - padL - padR;
+                const plotH = 175 - padT - padB;
+                const maxD = 14, maxN = 12;
+
+                const toX = d => padL + ((d - 1) / (maxD - 1)) * plotW;
+                const toY = n => padT + plotH - (n / maxN) * plotH;
+
+                let stepPaths = '';
+                for (let d = 1; d <= 13; d++) {
+                    const n1 = d <= 7 ? d : 7 + Math.ceil(0.5 * (d - 7));
+                    const n2 = (d + 1) <= 7 ? (d + 1) : 7 + Math.ceil(0.5 * ((d + 1) - 7));
+                    const x1 = toX(d), y1 = toY(n1);
+                    const x2 = toX(d + 1), y2 = toY(n2);
+                    stepPaths += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y1}" stroke="#15803d" stroke-width="2.2" />`;
+                    if (y1 !== y2) {
+                        stepPaths += `<line x1="${x2}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#15803d" stroke-width="1.2" stroke-dasharray="2 2" />`;
+                    }
+                    stepPaths += `<circle cx="${x1}" cy="${y1}" r="2.8" fill="#15803d" />`;
+                }
+                const n14 = 7 + Math.ceil(0.5 * (14 - 7));
+                stepPaths += `<circle cx="${toX(14)}" cy="${toY(n14)}" r="2.8" fill="#15803d" />`;
+
+                const curX = toX(currentDays);
+                const curY = toY(Math.min(maxN, currentSets));
+
+                stepSvg.innerHTML = `
+                    <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${175 - padB}" stroke="#64748b" stroke-width="1.2" />
+                    <line x1="${padL}" y1="${175 - padB}" x2="${320 - padR}" y2="${175 - padB}" stroke="#64748b" stroke-width="1.2" />
+                    <line x1="${toX(7)}" y1="${padT}" x2="${toX(7)}" y2="${175 - padB}" stroke="#f59e0b" stroke-width="1" stroke-dasharray="3 3" />
+                    <text x="${toX(7) - 18}" y="${padT + 9}" font-size="8" font-family="JetBrains Mono" fill="#b45309">d=7</text>
+                    <text x="${320 - 38}" y="${175 - 6}" font-size="9" font-family="JetBrains Mono" fill="#475569">วัน (d)</text>
+                    <text x="4" y="${padT + 6}" font-size="9" font-family="JetBrains Mono" fill="#475569">ชุด N</text>
+                    ${stepPaths}
+                    <circle cx="${curX}" cy="${curY}" r="5.5" fill="#dc2626" stroke="#ffffff" stroke-width="1.5" />
+                `;
+                if (stepCoord) stepCoord.textContent = `(d=${currentDays}, N=${currentSets})`;
+            }
+
+            const expSvg = document.getElementById('expFunctionSvg');
+            const expCoord = document.getElementById('graphExpCoord');
+            if (expSvg) {
+                const padL = 32, padB = 24, padT = 16, padR = 20;
+                const plotW = 320 - padL - padR;
+                const plotH = 175 - padT - padB;
+                const maxT = baseThick * 16;
+
+                const toX = n => padL + (n / 4) * plotW;
+                const toYArea = area => padT + plotH - (area / origArea) * plotH;
+                const toYThick = thick => padT + plotH - (thick / maxT) * plotH;
+
+                let areaPoints = [];
+                let thickPoints = [];
+                let dotsHtml = '';
+
+                for (let step = 0; step <= 4; step++) {
+                    const a = origArea / Math.pow(2, step);
+                    const t = baseThick * Math.pow(2, step);
+                    const x = toX(step);
+                    const ya = toYArea(a);
+                    const yt = toYThick(t);
+                    areaPoints.push(`${x},${ya}`);
+                    thickPoints.push(`${x},${yt}`);
+                    dotsHtml += `<circle cx="${x}" cy="${ya}" r="3" fill="#15803d" />`;
+                    dotsHtml += `<circle cx="${x}" cy="${yt}" r="3" fill="#d97706" />`;
+                    dotsHtml += `<text x="${x - 6}" y="${175 - 8}" font-size="9" font-family="JetBrains Mono" fill="#475569">n=${step}</text>`;
+                }
+
+                const curX = toX(currentN);
+                const curArea = origArea / Math.pow(2, currentN);
+                const curThick = baseThick * Math.pow(2, currentN);
+
+                expSvg.innerHTML = `
+                    <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${175 - padB}" stroke="#64748b" stroke-width="1.2" />
+                    <line x1="${padL}" y1="${175 - padB}" x2="${320 - padR}" y2="${175 - padB}" stroke="#64748b" stroke-width="1.2" />
+                    <polyline fill="none" stroke="#15803d" stroke-width="2.2" points="${areaPoints.join(' ')}" />
+                    <polyline fill="none" stroke="#d97706" stroke-width="2.2" points="${thickPoints.join(' ')}" />
+                    ${dotsHtml}
+                    <line x1="${curX}" y1="${padT}" x2="${curX}" y2="${175 - padB}" stroke="#dc2626" stroke-width="1.2" stroke-dasharray="3 2" />
+                    <circle cx="${curX}" cy="${toYArea(curArea)}" r="5" fill="#dc2626" stroke="#ffffff" stroke-width="1.5" />
+                    <circle cx="${curX}" cy="${toYThick(curThick)}" r="5" fill="#dc2626" stroke="#ffffff" stroke-width="1.5" />
+                `;
+                if (expCoord) expCoord.textContent = `n=${currentN} (A=${Math.round(curArea)}, T=${curThick.toFixed(1)}cm)`;
+            }
+        }
+
+        function saveCurrentExperimentLog() {
+            const btn = document.getElementById('saveSheetBtn');
+            const status = document.getElementById('saveSheetStatus');
+            const W = document.getElementById('bagW').value;
+            const L = document.getElementById('bagL').value;
+            const H = document.getElementById('bagH').value;
+            const days = document.getElementById('daysInput').value;
+            const usage = document.getElementById('kpiUsage').textContent;
+            const setsText = document.getElementById('kpiStepClothes').textContent.trim();
+
+            const payload = {
+                country: document.getElementById('countrySelect').selectedOptions[0].text,
+                days: Number(days),
+                bagDim: `${W}×${L}×${H}`,
+                bagVol: Math.round(W * L * H * (parseFloat(document.getElementById('packingEta')?.value) || 0.80)),
+                clothRatio: parseFloat(usage) || 0,
+                maxShirts: parseInt(setsText) || 0,
+                maxPants: parseInt(setsText) || 0,
+                usagePct: parseFloat(usage) || 0,
+                cog: (H / 2).toFixed(1),
+                status: document.getElementById('kpiStatus').textContent
+            };
+
+            if (btn) btn.disabled = true;
+            if (status) {
+                status.classList.remove('hidden');
+                status.textContent = 'กำลังบันทึกข้อมูลการทดลอง...';
+            }
+
+            if (typeof google !== 'undefined' && google.script && google.script.run) {
+                google.script.run
+                    .withSuccessHandler(res => {
+                        if (btn) btn.disabled = false;
+                        if (status) status.textContent = res.message || 'บันทึกข้อมูลลง Google Sheets เรียบร้อยแล้ว!';
+                    })
+                    .withFailureHandler(() => {
+                        if (btn) btn.disabled = false;
+                        if (status) status.textContent = 'บันทึกในหน่วยความจำเครื่องสำเร็จ (โหมดออฟไลน์)';
+                    })
+                    .saveCalculationLog(payload);
+            } else {
+                setTimeout(() => {
+                    if (btn) btn.disabled = false;
+                    if (status) {
+                        status.textContent = `บันทึกสถิติชุดการทดลอง (${days} วัน, ใช้พื้นที่ ${usage}) สำเร็จ!`;
+                    }
+                }, 400);
+            }
+        }
+
+        // ==========================================
+        // 6. AI CAMERA SCANNER & MANUAL SKETCH MODAL
+        // ==========================================
+        let activeMediaStream = null;
+        let capturedImageObj = null;
+        let capturedBase64 = null;
+        let isDrawingBox = false;
+        let drawStart = { x: 0, y: 0 };
+        let drawCurrent = { x: 0, y: 0 };
+
+        function openCameraModal() {
+            document.getElementById('aiCameraModal')?.classList.remove('hidden');
+            requestDeviceCamera();
+        }
+
+        function closeCameraModal() {
+            document.getElementById('aiCameraModal')?.classList.add('hidden');
+            stopCameraStream();
+        }
+
+        function stopCameraStream() {
+            if (activeMediaStream) {
+                activeMediaStream.getTracks().forEach(track => track.stop());
+                activeMediaStream = null;
+            }
+        }
+
+        async function requestDeviceCamera() {
+            const video = document.getElementById('liveCameraVideo');
+            const canvas = document.getElementById('sketchOverlayCanvas');
+            const placeholder = document.getElementById('cameraFallbackPlaceholder');
+            const statusText = document.getElementById('cameraStatusText');
+            const retakeBtn = document.getElementById('retakeCameraBtn');
+
+            if (canvas) canvas.classList.add('hidden');
+            if (retakeBtn) retakeBtn.classList.add('hidden');
+            if (placeholder) placeholder.classList.add('hidden');
+            if (video) video.classList.remove('hidden');
+            if (statusText) statusText.textContent = 'กำลังขออนุญาตเข้าถึงกล้องอุปกรณ์...';
+
+            stopCameraStream();
+
+            try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error('เบราว์เซอร์ไม่รองรับการเปิดกล้อง');
+                }
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' },
+                    audio: false
+                });
+                activeMediaStream = stream;
+                video.srcObject = stream;
+                statusText.textContent = 'เชื่อมต่อกล้องสำเร็จ! วางสิ่งของให้อยู่ในกรอบแล้วกด "ถ่ายภาพและให้ AI วิเคราะห์ขนาด"';
+            } catch (err) {
+                video.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+                statusText.textContent = 'ไม่ได้รับอนุญาตใช้กล้อง หรืออุปกรณ์ไม่มีกล้อง — สามารถใช้โหมดวาดเส้นกรอบสิ่งของได้ทันที';
+                enableManualSketchMode();
+            }
+        }
+
+        function resumeLiveCamera() {
+            document.getElementById('scanResultBox')?.classList.add('hidden');
+            requestDeviceCamera();
+        }
+
+        function drawGspGridBackground(ctx, w, h) {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, w, h);
+            ctx.strokeStyle = 'rgba(22, 163, 74, 0.14)';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < w; x += 24) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+            }
+            for (let y = 0; y < h; y += 24) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+            }
+            ctx.fillStyle = '#15803d';
+            ctx.font = 'bold 13px Prompt, sans-serif';
+            ctx.fillText('กระดานวาดเส้นกรอบสิ่งของ (GSP Sketch) : ลากเส้นสี่เหลี่ยมเพื่อกำหนดความกว้าง × ความยาว', 16, 26);
+        }
+
+        function enableManualSketchMode() {
+            const video = document.getElementById('liveCameraVideo');
+            const canvas = document.getElementById('sketchOverlayCanvas');
+            const placeholder = document.getElementById('cameraFallbackPlaceholder');
+            const resultBox = document.getElementById('scanResultBox');
+            const badge = document.getElementById('scanResultBadge');
+            const hint = document.getElementById('scanResultHint');
+
+            canvas.width = 640;
+            canvas.height = 360;
+            const ctx = canvas.getContext('2d');
+
+            if (activeMediaStream && !video.classList.contains('hidden') && video.videoWidth > 0) {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                capturedImageObj = new Image();
+                capturedImageObj.src = canvas.toDataURL('image/jpeg', 0.85);
+                stopCameraStream();
+            } else if (!capturedImageObj) {
+                drawGspGridBackground(ctx, canvas.width, canvas.height);
+            } else {
+                ctx.drawImage(capturedImageObj, 0, 0, canvas.width, canvas.height);
+            }
+
+            video.classList.add('hidden');
+            placeholder.classList.add('hidden');
+            canvas.classList.remove('hidden');
+            document.getElementById('retakeCameraBtn')?.classList.remove('hidden');
+
+            resultBox.classList.remove('hidden');
+            badge.textContent = 'โหมดวาดเส้นกรอบสิ่งของ (Manual Sketch)';
+            badge.className = 'text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900';
+            hint.textContent = 'ใช้นิ้วหรือเมาส์ลากวาดกรอบสี่เหลี่ยมครอบสิ่งของบนภาพด้านบน ระบบจะแปลงความกว้างและยาวของเส้นที่วาดเป็นเซนติเมตรให้อัตโนมัติ';
+            updateScanVolumePreview();
+        }
+
+        function handleImageUploadForScan(event) {
+            const file = event.target.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    capturedImageObj = img;
+                    capturedBase64 = e.target.result.split(',')[1];
+                    const canvas = document.getElementById('sketchOverlayCanvas');
+                    canvas.width = 640;
+                    canvas.height = 360;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    document.getElementById('liveCameraVideo').classList.add('hidden');
+                    document.getElementById('cameraFallbackPlaceholder').classList.add('hidden');
+                    canvas.classList.remove('hidden');
+                    document.getElementById('retakeCameraBtn').classList.remove('hidden');
+                    analyzeCapturedFrameWithGemini(capturedBase64);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function captureAndAnalyzeWithAI() {
+            const video = document.getElementById('liveCameraVideo');
+            const canvas = document.getElementById('sketchOverlayCanvas');
+            if (!activeMediaStream || video.classList.contains('hidden')) {
+                enableManualSketchMode();
+                return;
+            }
+
+            canvas.width = 640;
+            canvas.height = 360;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            capturedBase64 = dataUrl.split(',')[1];
+            capturedImageObj = new Image();
+            capturedImageObj.src = dataUrl;
+
+            stopCameraStream();
+            video.classList.add('hidden');
+            canvas.classList.remove('hidden');
+            document.getElementById('retakeCameraBtn').classList.remove('hidden');
+
+            await analyzeCapturedFrameWithGemini(capturedBase64);
+        }
+
+        async function analyzeCapturedFrameWithGemini(base64Data) {
+            const statusText = document.getElementById('cameraStatusText');
+            const resultBox = document.getElementById('scanResultBox');
+            const badge = document.getElementById('scanResultBadge');
+            const hint = document.getElementById('scanResultHint');
+
+            statusText.textContent = 'กำลังให้ AI วิเคราะห์วัตถุและประเมินมิติ W × L × H...';
+            resultBox.classList.remove('hidden');
+            badge.textContent = 'กำลังประมวลผลภาพ...';
+
+            try {
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+                const prompt = "วิเคราะห์สิ่งของหลักที่อยู่ในภาพสำหรับจัดลงกระเป๋าเดินทาง หากตรวจพบวัตถุชัดเจนให้ระบุชื่อภาษาไทยและประเมินขนาด กว้าง (w), ยาว (l), สูง (h) เป็นเซนติเมตร แต่หากภาพมืด เบลอ หรือไม่พบวัตถุชัดเจนให้ตั้งค่า found เป็น false";
+
+                const payload = {
+                    contents: [{
+                        role: "user",
+                        parts: [
+                            { text: prompt },
+                            { inlineData: { mimeType: "image/jpeg", data: base64Data } }
+                        ]
+                    }],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                found: { type: "BOOLEAN" },
+                                itemName: { type: "STRING" },
+                                w: { type: "NUMBER" },
+                                l: { type: "NUMBER" },
+                                h: { type: "NUMBER" }
+                            },
+                            required: ["found", "itemName", "w", "l", "h"]
+                        }
+                    }
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('API Error');
+                const resJson = await response.json();
+                const text = resJson?.candidates?.[0]?.content?.parts?.[0]?.text;
+                const parsed = JSON.parse(text);
+
+                if (!parsed.found) throw new Error('Object not detected');
+
+                document.getElementById('scannedItemName').value = parsed.itemName || 'สิ่งของสแกน AI';
+                document.getElementById('scannedItemW').value = Math.max(2, Math.round(parsed.w || 15));
+                document.getElementById('scannedItemL').value = Math.max(2, Math.round(parsed.l || 20));
+                document.getElementById('scannedItemH').value = Math.max(2, Math.round(parsed.h || 10));
+
+                badge.textContent = 'AI ตรวจพบวัตถุสำเร็จ';
+                badge.className = 'text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
+                hint.textContent = 'AI ประเมินขนาดให้เรียบร้อยแล้ว คุณสามารถลากวาดกรอบบนภาพเพื่อปรับสัดส่วนเพิ่มเติมได้';
+                statusText.textContent = `ตรวจพบ "${parsed.itemName}" เรียบร้อยแล้ว`;
+                updateScanVolumePreview();
+            } catch (err) {
+                badge.textContent = 'AI จับวัตถุไม่ชัด • สลับสู่โหมดวาดเส้นกรอบ';
+                badge.className = 'text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900';
+                hint.textContent = 'AI ไม่สามารถระบุขอบเขตวัตถุได้ชัดเจน กรุณาใช้นิ้วหรือเมาส์ลากวาดเส้นกรอบสี่เหลี่ยมรอบสิ่งของบนภาพด้านบนเพื่อคำนวณขนาด';
+                statusText.textContent = 'กรุณาวาดเส้นกรอบสี่เหลี่ยมรอบสิ่งของที่จะใส่กระเป๋าบนภาพด้านบน';
+                updateScanVolumePreview();
+            }
+        }
+
+        function initCanvasSketchEvents() {
+            const canvas = document.getElementById('sketchOverlayCanvas');
+            if (!canvas) return;
+
+            const getCoords = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: ((clientX - rect.left) / rect.width) * canvas.width,
+                    y: ((clientY - rect.top) / rect.height) * canvas.height
+                };
+            };
+
+            const startDraw = (e) => {
+                isDrawingBox = true;
+                drawStart = getCoords(e);
+                drawCurrent = { ...drawStart };
+            };
+
+            const moveDraw = (e) => {
+                if (!isDrawingBox) return;
+                e.preventDefault();
+                drawCurrent = getCoords(e);
+                renderSketchOverlayBox();
+            };
+
+            const endDraw = () => {
+                if (!isDrawingBox) return;
+                isDrawingBox = false;
+                const boxW = Math.abs(drawCurrent.x - drawStart.x);
+                const boxH = Math.abs(drawCurrent.y - drawStart.y);
+                if (boxW > 12 && boxH > 12) {
+                    const estW = Math.max(3, Math.round((boxW / canvas.width) * 55));
+                    const estL = Math.max(3, Math.round((boxH / canvas.height) * 45));
+                    document.getElementById('scannedItemW').value = estW;
+                    document.getElementById('scannedItemL').value = estL;
+                    updateScanVolumePreview();
+                }
+            };
+
+            canvas.addEventListener('mousedown', startDraw);
+            canvas.addEventListener('mousemove', moveDraw);
+            window.addEventListener('mouseup', endDraw);
+
+            canvas.addEventListener('touchstart', startDraw, { passive: false });
+            canvas.addEventListener('touchmove', moveDraw, { passive: false });
+            canvas.addEventListener('touchend', endDraw);
+        }
+
+        function renderSketchOverlayBox() {
+            const canvas = document.getElementById('sketchOverlayCanvas');
+            const ctx = canvas.getContext('2d');
+            if (capturedImageObj && capturedImageObj.complete && capturedImageObj.naturalWidth > 0) {
+                ctx.drawImage(capturedImageObj, 0, 0, canvas.width, canvas.height);
+            } else {
+                drawGspGridBackground(ctx, canvas.width, canvas.height);
+            }
+
+            const x = Math.min(drawStart.x, drawCurrent.x);
+            const y = Math.min(drawStart.y, drawCurrent.y);
+            const w = Math.abs(drawCurrent.x - drawStart.x);
+            const h = Math.abs(drawCurrent.y - drawStart.y);
+
+            ctx.fillStyle = 'rgba(250, 204, 21, 0.22)';
+            ctx.fillRect(x, y, w, h);
+            ctx.strokeStyle = '#facc15';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([6, 4]);
+            ctx.strokeRect(x, y, w, h);
+            ctx.setLineDash([]);
+
+            const estW = Math.max(3, Math.round((w / canvas.width) * 55));
+            const estL = Math.max(3, Math.round((h / canvas.height) * 45));
+            ctx.fillStyle = '#065f46';
+            ctx.fillRect(x, Math.max(0, y - 24), 130, 22);
+            ctx.fillStyle = '#fef08a';
+            ctx.font = 'bold 12px JetBrains Mono, monospace';
+            ctx.fillText(`W:${estW}cm × L:${estL}cm`, x + 6, Math.max(15, y - 8));
+        }
+
+        function updateScanVolumePreview() {
+            const w = parseFloat(document.getElementById('scannedItemW')?.value) || 0;
+            const l = parseFloat(document.getElementById('scannedItemL')?.value) || 0;
+            const h = parseFloat(document.getElementById('scannedItemH')?.value) || 0;
+            const preview = document.getElementById('scanVolumePreview');
+            if (preview) preview.textContent = `V = ${(w * l * h).toLocaleString()} ลบ.ซม.`;
+        }
+
+        function confirmAddScannedItem() {
+            const name = document.getElementById('scannedItemName').value.trim() || 'สิ่งของจากกล้อง';
+            const w = Math.max(1, parseFloat(document.getElementById('scannedItemW').value) || 10);
+            const l = Math.max(1, parseFloat(document.getElementById('scannedItemL').value) || 15);
+            const h = Math.max(1, parseFloat(document.getElementById('scannedItemH').value) || 8);
+            customItems.push({ name, w, l, h });
+            closeCameraModal();
+            switchMainPage('page-app');
+            calculateAll();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderHeroSlide();
+            calculateAll();
+            startHeroAutoplay();
+            initCanvasSketchEvents();
+        });
+    </script>
+</body>
+</html>
